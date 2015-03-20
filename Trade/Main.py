@@ -1,4 +1,22 @@
 # -*- coding: utf-8 -*-
+# ROBLOX Trade Currency bot.
+# Copyright (C) 2015  Diana S. Land
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+# Diana may be contacted online at CrazyKilla15@gmail.com
 """
 Created on May 18, 2014
 
@@ -14,10 +32,13 @@ from lxml import html
 
 from colorama import init, deinit, Fore, Style
 
+os.system("cd " + os.pardir)
+print(os.system("pwd"))
+
 from RbxAPI import general, trade
 from RbxAPI.errors import LoginError, Iaz3Error, SetupError, InvalidException
 from RbxAPI.inputPass import getpass, getnum
-
+from setup.py import ver
 
 os.environ["REQUESTS_CA_BUNDLE"] = os.path.abspath(os.path.join(os.path.dirname( __file__ ), os.pardir, 'cacert.pem'))
 # os.path.join(os.getcwd(), "cacert.pem")
@@ -246,8 +267,11 @@ def main():
         time.sleep(5)
 
 if __name__ == '__main__':
-    print('Trade Currency Bot made by Iaz3, offically distrubuted on reddit via MEGA\n BOT IS PROVIDED AS IS'
-          '\n IAZ3 NOT LIABLE FOR ANY DAMAGES TO YOUR COMPUTER\n')
+    print("TCBOT version " + ver + ", Copyright (C) 2015 Diana S. Land"
+          "Gnomovision comes with ABSOLUTELY NO WARRANTY;"
+          "This is free software, and you are welcome to redistribute it"
+          "under certain conditions;")
+    print("Trade Currency Bot made by Iaz3, offically distrubuted on reddit via MEGA")
     # FIXME: all these try excepts blocks seem pretty bad.
     try:
         setup()

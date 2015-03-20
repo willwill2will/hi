@@ -1,4 +1,27 @@
 # -*- coding: utf-8 -*-
+# ROBLOX Trade Currency bot.
+# Copyright (C) 2015  Diana S. Land
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+# Diana may be contacted online at CrazyKilla15@gmail.com
+
+# Authors: Piers Lauder (original)
+#          Guido van Rossum (Windows support and cleanup)
+#          Gregory P. Smith (tty support & GetPassWarning)
+#          Diana S. Land (Recent additions to windows version)
 """
 Created on Aug 18, 2014
 
