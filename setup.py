@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# #### WARNING ####
+# #### THIS IS NOT PART OF THE FUCKING PROGRAM. IT IS USED TO BUILD THE EXE ONLY. YOU DO NOT NEED IT ####
+# #### UNLESS YOU ARE MAKING THE EXE AND DISTRUBUTING IT TO OTHERS, IGNORE THIS. ####
 # ROBLOX Trade Currency bot.
 # Copyright (C) 2015  Diana S. Land
 # This file is a part of the ROBLOX Trade Currency bot.
