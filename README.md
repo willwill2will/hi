@@ -11,7 +11,7 @@ This README would normally document whatever steps are necessary to get your app
 
 * Run main.py in the Trade folder.
 * Configuration: config.ini (broke)
-* Dependencies: LXML, Requests, Beautifulsoup 4, and colorama.
+* Dependencies: **Python 3.x**, LXML, Requests, Beautifulsoup 4, and colorama.
 * How to run tests: No idea.
 * Deployment instructions: Figure it out.
 
