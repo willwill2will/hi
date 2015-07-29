@@ -1,6 +1,6 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+Roblox Trade Currency Bot
 
 ### What is this repository for? ###
 
@@ -25,3 +25,7 @@ This README would normally document whatever steps are necessary to get your app
 
 * Diana Land. Iaz3 on ROBLOX. Email: crazykilla15@gmail.com
 * Other community or team contact
+
+### More Info ###
+
+* Check the wiki
