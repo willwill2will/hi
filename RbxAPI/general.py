@@ -76,17 +76,6 @@ def GetToken():
     return Token
 
 
-def getIP():
-    """
-    Gets a user's IP Address
-
-    :return: IP
-    :rtype: str
-    """
-    # May want to IP ban users at some point. Shh top secret. Maintain online list?
-    return requests.get('http://api.ipify.org').text
-
-
 def getValidation(url):
     """
     gets validation from webpage for submitting requests
@@ -104,7 +93,7 @@ def getValidation(url):
         return viewstate[0]['value'], eventvalidation[0]['value']
     except Exception:
         print(viewstate, eventvalidation)
-        raise
+        raise errors.InvalidException
 
 
 def listAccounts():
@@ -115,7 +104,10 @@ def listAccounts():
     :rtype: list
     """
     accounts = []
-    for file in glob.glob(os.path.join(returnPath(), "*.acc")):
+    for file in os.scandir(returnPath()):
+        if file.is_file():
+            print(file.name.split('.'))
+    for file in glob.glob(returnPath() + "*.acc"):
         accounts.append(file.split('.')[0])
     return accounts
 

@@ -186,7 +186,6 @@ def setup():
             if account in accounts:
                 loadAccounts(account)
                 break
-    # print(Style.RESET_ALL + " ")
     deinit()
 
 
@@ -229,7 +228,6 @@ if __name__ == '__main__':
         global Profit
         global lastTix
         global lastBux
-        print(general.LoggedInUser)
         Profit = int(readConfig(general.LoggedInUser, 'Profit'))
         lastTix = int(readConfig(general.LoggedInUser, 'lastTix'))
         lastBux = int(readConfig(general.LoggedInUser, 'lastBux'))
