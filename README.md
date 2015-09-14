@@ -5,7 +5,7 @@ Roblox Trade Currency Bot
 ### What is this repository for? ###
 
 * The ROBLOX Trade Currency Bot, created by iaz3(Diana Land)
-* Version 2.0
+* Version 2.0.1
 
 ### How do I get set up? ###
 
@@ -13,14 +13,13 @@ Roblox Trade Currency Bot
 * Configuration: config.ini (broke)
 * Dependencies: **Python 3.x**, LXML, Requests, Beautifulsoup 4, and colorama.
 * Build Dependencies: Cx_Freeze is needed **in addition to** the above to build.
-* How to run tests: No idea.
-* Deployment instructions: Figure it out.
+* How to run tests: No Tests
 
 ### Contribution guidelines ###
 
-* Writing tests: Idk.
+* Writing tests: No Tests At the Moment
 * Code review: Ask me. Follow pep8. Readable. Document it.
-* Other guidelines: None
+* Other guidelines: Unix newlines.
 
 ### Who do I talk to? ###
 
