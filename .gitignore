@@ -112,3 +112,6 @@ target/
 ### My Own
 tcbot/
 *.acc
+RbxAPI/messages.py
+RbxAPI/party.py
+RbxAPI/__pycache__/
