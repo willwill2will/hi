@@ -68,7 +68,7 @@ bdist_msi_options = {
     'upgrade_code': '{B8086972-1305-4CE4-854D-F050B99DC05C}', 'data': msi_data, 'product_code': GUID
 }
 
-app = Executable("Trade\Main.py", targetName='TCBot.exe', icon="TCicon.ico", )
+app = Executable("Main.py", targetName='TCBot.exe', icon="TCicon.ico", )
 
 ver = '2.0'
 setup(name="Trade Currency Bot", author='Iaz3', author_email='CrazyKilla15@gmail.com', version=ver,
