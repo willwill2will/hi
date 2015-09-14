@@ -209,6 +209,17 @@ def main():
         time.sleep(5)
 
 
+@atexit.register
+def closing():
+    """
+
+    :return:
+    :rtype:
+    """
+    deinit()
+    pause()
+
+
 if __name__ == '__main__':
     print('Trade Currency Bot made by Iaz3, offically distrubuted on reddit via MEGA\n BOT IS PROVIDED AS IS'
           '\n IAZ3 NOT LIABLE FOR ANY DAMAGES TO YOUR COMPUTER\n')
@@ -235,14 +246,3 @@ if __name__ == '__main__':
         deinit()
         print(str(e))
         raise
-
-
-@atexit.register
-def closing():
-    """
-
-    :return:
-    :rtype:
-    """
-    deinit()
-    pause()
