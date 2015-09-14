@@ -105,7 +105,7 @@ def listAccounts():
     """
     accounts = []
     for file in os.scandir(returnPath()):
-        if file.is_file():
+        if file.is_file() and file.name.endswith('.acc'):
             accounts.append(file.name.split('.')[0])
     return accounts
 
