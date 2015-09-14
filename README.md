@@ -9,7 +9,7 @@ Roblox Trade Currency Bot
 
 ### How do I get set up? ###
 
-* Run main.py in the Trade folder.
+* Run main.py in the Trade folder. OR TCBot.exe from [here](https://bitbucket.org/Iaz3/tcbot/wiki/Downloads)
 * Configuration: config.ini (broke)
 * Dependencies: **Python 3.x**, LXML, Requests, Beautifulsoup 4, and colorama.
 * Build Dependencies: Cx_Freeze is needed **in addition to** the above to build.
