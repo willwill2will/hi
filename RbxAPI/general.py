@@ -107,22 +107,6 @@ def getValidation(url):
         raise
 
 
-def NOgetSession():
-    """
-    Used to get the current requests session in use by the program.
-    This session is used universally by all programs using this API
-
-    :return: Requests Session
-    :rtype: requests.Session
-    :raise errors.LoginError: Error logging in.
-    """
-    raise NotImplementedError
-    if loggedIn:
-        return s
-    else:
-        raise errors.LoginError('Failed to load account, cannot continue', 2003)
-
-
 def listAccounts():
     """
     List the accounts currently saved to disk
@@ -131,7 +115,7 @@ def listAccounts():
     :rtype: list
     """
     accounts = []
-    for file in glob.glob("*.acc"):
+    for file in glob.glob(os.path.join(returnPath(), "*.acc")):
         accounts.append(file.split('.')[0])
     return accounts
 
@@ -145,7 +129,8 @@ def loadAccounts(user):
     :return: True if success
     :rtype: bool
     """
-    with open(str(user) + '.acc', 'rb') as f:
+    user = str(user)
+    with open(returnPath(user + '.acc'), 'rb') as f:
         cookies = pickle.load(f)
         Session.cookies = cookies
         r = Session.get(CheckURL)
@@ -154,7 +139,7 @@ def loadAccounts(user):
             print("Cookies Failed To Load. Please Login Again.")
             return False
         print('Cookies Loaded Successfully')
-        _SetLoggedIn(True, str(user))
+        _SetLoggedIn(True, user)
         return True
 
 
@@ -163,18 +148,21 @@ def login(user, pwd):
     Login into the account
 
     :param pwd: Password used to login
+    :type pwd: str
     :param user: Username used to log in
+    :type user: str
     """
+    user = str(user)
     if len(user) < 1:
         raise errors.LoginError("Empty Username", 9000)
-    with open(str(user) + '.acc', 'wb') as f:
+    with open(returnPath(user + '.acc'), 'wb') as f:
         data = {'username': user, 'password': pwd}
         Session.post(LoginURL, data=data)  # login
         Session.get(CheckURL)
         if '.ROBLOSECURITY' in Session.cookies:
             pickle.dump(Session.cookies, f)
             print('Save Successful')
-            _SetLoggedIn(True, str(user))
+            _SetLoggedIn(True, user)
             return True
         else:
             f.close()
@@ -239,7 +227,7 @@ def returnPath(file=None):
     if file:
         return os.path.join(path, file)
     if not file:
-        return path + os.sep
+        return path
 
 
 def writeConfig(data):
