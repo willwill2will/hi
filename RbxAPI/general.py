@@ -106,9 +106,7 @@ def listAccounts():
     accounts = []
     for file in os.scandir(returnPath()):
         if file.is_file():
-            print(file.name.split('.'))
-    for file in glob.glob(returnPath() + "*.acc"):
-        accounts.append(file.split('.')[0])
+            accounts.append(file.name.split('.')[0])
     return accounts
 
 
