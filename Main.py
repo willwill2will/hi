@@ -10,12 +10,12 @@ The frontend for my trading bot.
 import math
 import time
 import os
-
+import atexit
 from lxml import html
 from colorama import init, deinit, Fore
 
 from RbxAPI import getpass, getnum, getValidation, TCUrl, getCash, getSpread, getRate, login, listAccounts, \
-    loadAccounts, writeConfig, readConfig, checkTrades, general
+    loadAccounts, writeConfig, readConfig, checkTrades, general, pause
 from RbxAPI.errors import LoginError, Iaz3Error, SetupError, InvalidException
 
 os.environ["REQUESTS_CA_BUNDLE"] = os.path.abspath(os.path.join(os.path.realpath('__file__'), os.pardir, 'cacert.pem'))
@@ -235,3 +235,14 @@ if __name__ == '__main__':
         #     deinit()
         #     print('Goodbye!')
         #     os.system('pause')
+
+
+@atexit.register
+def closing():
+    """
+
+    :return:
+    :rtype:
+    """
+    deinit()
+    pause()
