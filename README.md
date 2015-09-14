@@ -20,6 +20,7 @@ Roblox Trade Currency Bot
 * Writing tests: No Tests At the Moment
 * Code review: Ask me. Follow pep8. Readable. Document it.
 * Other guidelines: Unix newlines.
+* Read the build instructions found [here](https://bitbucket.org/Iaz3/tcbot/wiki/Building)
 
 ### Who do I talk to? ###
 
