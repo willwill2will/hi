@@ -66,11 +66,7 @@ def win_getNum(prompt='> ', choices=2, stream=None):
     :param prompt: What to prompt user with
     :type prompt: str
     """
-    if sys.stdin is not sys.__stdin__:
-        raise Exception("Bad.")
-        # return fallback_getpass(prompt, stream)
     import msvcrt
-
     for c in prompt:
         msvcrt.putwch(c)
     num = ""
@@ -93,7 +89,6 @@ def win_getNum(prompt='> ', choices=2, stream=None):
                 if int(c) <= choices and len(num) <= 0:
                     msvcrt.putwch(c)
                     num = c
-
     msvcrt.putwch('\r')
     msvcrt.putwch('\n')
     try:
@@ -106,11 +101,7 @@ def win_pause():
     """
     Stops the program from exiting immediatly.
     """
-    if sys.stdin is not sys.__stdin__:
-        raise Exception("Bad.")
-        # return fallback_getpass(prompt, stream)
     import msvcrt
-
     for c in "Press any key to exit.":
         msvcrt.putwch(c)
     while 1:
@@ -125,7 +116,7 @@ def fallback_getpass(prompt='Password: ', stream=None):
     """
 
     :param prompt: Prompt for user
-    :param stream: No fucking idea cunt
+    :param stream: No fucking idea
     :return:
     """
     warnings.warn("Can not control echo on the terminal.", errors.GetPassWarning, stacklevel=2)
