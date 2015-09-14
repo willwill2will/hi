@@ -25,7 +25,7 @@ def win_getpass(prompt='Password: ', stream=None):
     Prompt for password with echo off, using Windows getch().
 
     :param stream: No idea #SorryNotSorry
-    :param prompt: What to tell the idiot user.
+    :param prompt: What to display/prompt to the user.
     """
     if sys.stdin is not sys.__stdin__:
         return fallback_getpass(prompt, stream)
@@ -68,7 +68,7 @@ def win_getNum(prompt='> ', choices=2, stream=None):
     """
     if sys.stdin is not sys.__stdin__:
         raise Exception("Bad.")
-        #return fallback_getpass(prompt, stream)
+        # return fallback_getpass(prompt, stream)
     import msvcrt
 
     for c in prompt:
@@ -101,6 +101,7 @@ def win_getNum(prompt='> ', choices=2, stream=None):
     except ValueError:
         return None
 
+
 def win_pause():
     """
     Stops the program from exiting immediatly.
@@ -119,6 +120,7 @@ def win_pause():
     msvcrt.putwch('\r')
     msvcrt.putwch('\n')
 
+
 def fallback_getpass(prompt='Password: ', stream=None):
     """
 
@@ -126,8 +128,7 @@ def fallback_getpass(prompt='Password: ', stream=None):
     :param stream: No fucking idea cunt
     :return:
     """
-    warnings.warn("Can not control echo on the terminal.", errors.GetPassWarning,
-                  stacklevel=2)
+    warnings.warn("Can not control echo on the terminal.", errors.GetPassWarning, stacklevel=2)
     if not stream:
         stream = sys.stderr
     print("Warning: Password input may be echoed.", file=stream)
@@ -157,6 +158,7 @@ def _raw_input(prompt="", stream=None, inputt=None):
     if line[-1] == '\n':
         line = line[:-1]
     return line
+
 
 # Bind the name getpass to the appropriate function
 
