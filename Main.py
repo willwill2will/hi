@@ -17,7 +17,7 @@ from lxml import html
 from colorama import init, deinit, Fore
 
 from RbxAPI import getpass, getnum, getValidation, TCUrl, getCash, getSpread, getRate, login, listAccounts, \
-    loadAccounts, writeConfig, readConfig, checkTrades, general, pause
+    loadAccounts, writeConfig, readConfig, checkTrades, general, pause, Session
 from RbxAPI.errors import LoginError, Iaz3Error, SetupError, InvalidException
 
 if getattr(sys, 'frozen', False):
@@ -25,7 +25,6 @@ if getattr(sys, 'frozen', False):
         os.path.join(os.path.abspath(sys.argv[0]), os.pardir, "cacert.pem"))
 
 url = TCUrl
-s = None
 values = {
     'ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$OrderType': 'LimitOrderRadioButton',
     'ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$AllowSplitTradesCheckBox': 'on',
@@ -100,7 +99,7 @@ def submit(toTrade, fromC, get, toC):
     values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$WantAmountTextBox'] = get
     values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$WantCurrencyDropDownList'] = toC
 
-    s.post(url, data=values)
+    Session.post(url, data=values)
 
 
 def calculate(mode):
