@@ -17,7 +17,7 @@ import warnings
 
 from RbxAPI import errors
 
-__all__ = ["getpass", "getnum"]
+__all__ = ["getpass", "getnum", "win_pause"]
 
 
 def win_getpass(prompt='Password: ', stream=None):
@@ -101,6 +101,23 @@ def win_getNum(prompt='> ', choices=2, stream=None):
     except ValueError:
         return None
 
+def win_pause():
+    """
+    Stops the program from exiting immediatly.
+    """
+    if sys.stdin is not sys.__stdin__:
+        raise Exception("Bad.")
+        # return fallback_getpass(prompt, stream)
+    import msvcrt
+
+    for c in "Press any key to exit.":
+        msvcrt.putwch(c)
+    while 1:
+        c = msvcrt.getwch()
+        if c:
+            break
+    msvcrt.putwch('\r')
+    msvcrt.putwch('\n')
 
 def fallback_getpass(prompt='Password: ', stream=None):
     """
@@ -157,6 +174,7 @@ except (ImportError, AttributeError):
     else:
         getpass = win_getpass
         getnum = win_getNum
+        pause = win_pause
 else:
     # getpass = unix_getpass
     raise errors.UnsupportedError()
