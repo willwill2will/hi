@@ -11,6 +11,8 @@ import math
 import time
 import os
 import atexit
+import sys
+
 from lxml import html
 from colorama import init, deinit, Fore
 
@@ -18,7 +20,10 @@ from RbxAPI import getpass, getnum, getValidation, TCUrl, getCash, getSpread, ge
     loadAccounts, writeConfig, readConfig, checkTrades, general, pause
 from RbxAPI.errors import LoginError, Iaz3Error, SetupError, InvalidException
 
-os.environ["REQUESTS_CA_BUNDLE"] = os.path.abspath(os.path.join(os.path.realpath('__file__'), os.pardir, 'cacert.pem'))
+if getattr(sys, 'frozen', False):
+    os.environ["REQUESTS_CA_BUNDLE"] = os.path.abspath(
+        os.path.join(os.path.realpath("__file__"), os.pardir, "cacert.pem"))
+
 url = TCUrl
 s = None
 values = {
@@ -230,11 +235,6 @@ if __name__ == '__main__':
         deinit()
         print(str(e))
         raise
-        # TODO: Define atexit
-        # finally:
-        #     deinit()
-        #     print('Goodbye!')
-        #     os.system('pause')
 
 
 @atexit.register
