@@ -31,6 +31,8 @@ values = {
     '__EVENTTARGET': 'ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$SubmitTradeButton'
 }
 
+version = '2.0.2'
+
 
 # noinspection PyUnusedLocal,PyUnreachableCode
 def cancel(num):
@@ -219,8 +221,11 @@ def closing():
 
 
 if __name__ == '__main__':
-    print('Trade Currency Bot made by Iaz3, offically distrubuted on reddit via MEGA\n BOT IS PROVIDED AS IS'
-          '\n IAZ3 NOT LIABLE FOR ANY DAMAGES TO YOUR COMPUTER\n')
+    print('Trade Currency Bot made by Iaz3, offically distrubuted on reddit/bitbucket via MEGA\n BOT IS PROVIDED AS IS')
+    print("ROBLOX TCBot version " + version + ", Copyright (C) 2015 Diana"
+          "ROBLOX TCBot comes with ABSOLUTELY NO WARRANTY; for details, refer to the LICENSE file."
+          "This is free software, and you are welcome to redistribute it"
+          "under certain conditions; read the LICENSE file for details.")
     try:
         setup()
         deinit()

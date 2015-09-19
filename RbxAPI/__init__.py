@@ -11,7 +11,7 @@ Read LICENSE for more information
 
 # Internal
 __author__ = 'Diana'
-__version__ = '2.0.1'
+__version__ = '2.0.2'
 
 import os
 import sys
