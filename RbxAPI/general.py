@@ -254,6 +254,8 @@ def readConfig(user, key):
     if user in config:
         userData = config[user]
         return userData.get(key, 0)
+    elif not LoggedIn:
+        return 0
     else:
         raise errors.InvalidException
         print("This is bad.")
