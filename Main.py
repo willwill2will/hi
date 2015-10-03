@@ -153,7 +153,7 @@ def setup():
     """
     Setup the bot.
 
-    :raise LoginError:
+    :raises: SetupError, LoginError
     """
     init()
     print(Fore.WHITE + '   1: Log In?')
