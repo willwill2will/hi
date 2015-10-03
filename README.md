@@ -5,11 +5,12 @@ Roblox Trade Currency Bot
 ### What is this repository for? ###
 
 * The ROBLOX Trade Currency Bot, created by iaz3(Diana Land)
-* Version 2.0.1
+* Version 2.0.2 **UPCOMING**
 
 ### How do I get set up? ###
 
 * Run main.py in the Trade folder. OR TCBot.exe from [here](https://bitbucket.org/Iaz3/tcbot/wiki/Downloads)
+> NOTE: You only need the below Dependencies if you are NOT using the EXE
 * Configuration: config.ini (broke)
 * Dependencies: **Python 3.x**, LXML, Requests, Beautifulsoup 4, and colorama.
 * Build Dependencies: Cx_Freeze is needed **in addition to** the above to build.
