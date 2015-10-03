@@ -21,17 +21,22 @@ class Iaz3Error(Exception):
 
 class ConnectError(Iaz3Error):
     """
-    Error connecting
-
-    :param message: Message to display. Can be None.
+    Connection Error.
     """
 
     def __init__(self, message=None):
+        """
+        :param message: Message to display.
+        :type message: str | None
+        """
         self.message = message or 'Error 1000: Failed to connect to ROBLOX.com'
         self.errno = 1000
 
     def __str__(self):
         return self.message
+
+    def __repr__(self):
+        return "<{0}> {1}".format(self.__class__.__name__, self.__dict__ or '')
 
 
 class InvalidException(Iaz3Error):
@@ -39,12 +44,15 @@ class InvalidException(Iaz3Error):
     Throws when the exception is invalid.
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, msg):
+        self.msg = msg or 'This exception is the result of an unexpected error. Please contact Iaz3.'
+        self.errcode = 5
 
     def __str__(self):
-        return 'This exception is the result of an unexpected error. Please contact Iaz3.'
+        return self.msg
 
+    def __repr__(self):
+        return "<{0}> {1}".format(self.__class__.__name__, self.__dict__ or '')
 
 class LoginError(Iaz3Error):
     """
@@ -59,16 +67,12 @@ class LoginError(Iaz3Error):
         self.errno = errno or 2000
         self.message = message or 'Error 2000: Failed to login, cannot continue.'
         self.msg = 'Error {0}: {1}'.format(self.errno, self.message)
-        # Error if there is message and not an error number, or if there is an error number and not a message.
-        # If there is one, there has to be the other. Otherwise error.
-        # Does format crash on None values? i guess not
-        # FIXME: Why do i have this? Default values are RIGHT there...
-        # if ((not errno) and message) or (errno and (not message)):
-        #     raise InvalidException
 
     def __str__(self):
         return self.msg
 
+    def __repr__(self):
+        return "<{0}> {1}".format(self.__class__.__name__, self.__dict__ or '')
 
 class SetupError(Iaz3Error):
     """
@@ -81,10 +85,13 @@ class SetupError(Iaz3Error):
     def __str__(self):
         return "There was an error during Setup"
 
+    def __repr__(self):
+        return "<{0}> {1}".format(self.__class__.__name__, self.__dict__ or '')
+
 
 class UnsupportedError(Iaz3Error):
     """
-    Unsuported operatign system. O.O
+    Unsuported operatign system.
     """
 
     def __init__(self):
@@ -93,13 +100,16 @@ class UnsupportedError(Iaz3Error):
     def __str__(self):
         return 'This operating system is unsuporrted, Sorry!'
 
-
-if __name__ == '__main__':
-    pass
+    def __repr__(self):
+        return "<{0}> {1}".format(self.__class__.__name__, self.__dict__ or '')
 
 
 class GetPassWarning(UserWarning):
     """
     Base class for exceptions.
     """
+    pass
+
+
+if __name__ == '__main__':
     pass

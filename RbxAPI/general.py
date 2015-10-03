@@ -12,7 +12,6 @@ Copyright (C) 2015  Diana Land
 Read LICENSE for more information
 """
 import configparser
-import glob
 import os
 import pickle
 import json
@@ -26,6 +25,7 @@ from RbxAPI import errors, Session, CheckURL, LoginURL
 # User, Authentication.
 LoggedIn = False  # This is ONLY True Or False.
 LoggedInUser = None  # This will be a string, containing the username of the user.
+# TODO: User Class?
 
 
 def _SetLoggedIn(value, user=None):
@@ -92,6 +92,7 @@ def getValidation(url):
     try:
         return viewstate[0]['value'], eventvalidation[0]['value']
     except Exception:
+        raise
         print(viewstate, eventvalidation)
         raise errors.InvalidException
 
@@ -125,9 +126,8 @@ def loadAccounts(user):
         Session.cookies = cookies
         r = Session.get(CheckURL)
         if r.url != CheckURL:
-            # FIXME: maybe this is a better logon check. needs testing.
             print("Cookies Failed To Load. Please Login Again.")
-            return False
+            raise errors.LoginError("Invalid cookie")
         print('Cookies Loaded Successfully')
         _SetLoggedIn(True, user)
         return True
@@ -143,7 +143,7 @@ def login(user, pwd):
     :type user: str
     """
     user = str(user)
-    if len(user) < 1:
+    if not user:
         raise errors.LoginError("Empty Username", 9000)
     with open(returnPath(user + '.acc'), 'wb') as f:
         data = {'username': user, 'password': pwd}
@@ -157,10 +157,7 @@ def login(user, pwd):
         else:
             f.close()
             os.remove(f.name)
-            # return False
-            # FIXME: Why not raise it? I think it should be raised.., So i'm going to do it.
-            # Hope it doesnt cause problems
-            raise errors.LoginError("Not valid cookie")
+            raise errors.LoginError("Invalid cookie")
 
 
 def convert(obj):
@@ -174,7 +171,7 @@ def convert(obj):
     try:
         # Warning, this will fail if theres a problem with the internet and the page doesnt load correctly.
         # Obj will be bad.
-        # FIXME: Implement Checks for this.
+        # FIXME: Implement Checks for this?
         return json.loads(obj)  # Should work.
     except SyntaxError:
         raise
@@ -203,7 +200,7 @@ def checkInternet():
 
 def returnPath(file=None):
     """
-    Returns the path used for data Storage.
+    Returns the path used for Data Storage.
 
     :param file: File to create path to. May or may not exist. optional.
     :type file: str
@@ -227,12 +224,10 @@ def writeConfig(data):
     :param data: Data
     :type data: dict
     """
-    config = configparser.ConfigParser()
-    if LoggedInUser:
-        config[LoggedInUser] = data
-    if not LoggedInUser:
-        config["TESTING"] = data
+    if not LoggedInUser and LoggedIn:
         raise errors.InvalidException
+    config = configparser.ConfigParser()
+    config[LoggedInUser] = data
     with open(returnPath('config.ini'), 'w') as configfile:
         config.write(configfile)
         configfile.close()
@@ -249,14 +244,12 @@ def readConfig(user, key):
     :return: Value requested, so far only int values.
     :rtype: int
     """
+    if not LoggedIn:
+        raise errors.InvalidException("Not Logged In.")
     config = configparser.ConfigParser()
     config.read(returnPath('config.ini'))
-    if user in config:
+    if user in config:  # Previously saved config.
         userData = config[user]
         return userData.get(key, 0)
-    elif not LoggedIn:
-        return 0
-    else:
-        raise errors.InvalidException
-        print("This is bad.")
+    else:  # No existing config file, currently logged in.
         return 0

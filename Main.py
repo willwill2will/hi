@@ -217,10 +217,10 @@ def closing():
 
 
 if __name__ == '__main__':
-    print('Trade Currency Bot made by Iaz3, offically distrubuted on reddit/bitbucket via MEGA BOT IS PROVIDED AS IS')
+    print('Trade Currency Bot made by Iaz3, offically distrubuted on reddit/bitbucket via MEGA BOT IS PROVIDED AS IS.')
     print("ROBLOX TCBot version " + version + ", Copyright (C) 2015 Diana"
-          "ROBLOX TCBot comes with ABSOLUTELY NO WARRANTY; for details, refer to the LICENSE file."
-          "This is free software, and you are welcome to redistribute it"
+          "\nROBLOX TCBot comes with ABSOLUTELY NO WARRANTY; for details, refer to the LICENSE file."
+          "\nThis is free software, and you are welcome to redistribute it "
           "under certain conditions; read the LICENSE file for details.")
     try:
         setup()
