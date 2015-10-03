@@ -5,7 +5,7 @@ Roblox Trade Currency Bot
 ### What is this repository for? ###
 
 * The ROBLOX Trade Currency Bot, created by iaz3(Diana Land)
-* Version 2.0.2 **UPCOMING**
+* Version 2.0.2
 
 ### How do I get set up? ###
 
