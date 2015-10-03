@@ -1,8 +1,6 @@
-# README #
+# Roblox Trade Currency Bot #
 
-Roblox Trade Currency Bot
-
-# Downloads #
+### Downloads ###
 * [Download](https://bitbucket.org/Iaz3/tcbot/wiki/Downloads)
 * Simply run the TCBot shortcut created on your desktop
 
