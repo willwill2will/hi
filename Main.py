@@ -5,7 +5,6 @@ Created on May 18, 2014
 @author: Diana
 
 The frontend for my trading bot.
-
 """
 import math
 import time
@@ -24,7 +23,6 @@ if getattr(sys, 'frozen', False):
     os.environ["REQUESTS_CA_BUNDLE"] = os.path.abspath(
         os.path.join(os.path.abspath(sys.argv[0]), os.pardir, "cacert.pem"))
 
-url = TCUrl
 values = {
     'ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$OrderType': 'LimitOrderRadioButton',
     'ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$AllowSplitTradesCheckBox': 'on',
@@ -44,7 +42,7 @@ def cancel(num):
     """
     raise NotImplementedError
     global Profit
-    state, event = getValidation(url)
+    state, event = getValidation(TCUrl)
     # tra = str(c)  # what to cancel. starts at 0, goes +1
     values2 = {
         'ctl00$ctl00$ScriptManager': ('ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$OpenOffers$OpenOffersUpdat'
@@ -65,7 +63,7 @@ def cancel(num):
         '__VIEWSTATE': state, '__EVENTVALIDATION': event
     }
 
-    r = s.get(url)
+    r = s.get(TCUrl)
     tree = html.fromstring(r.text)
     Tremain = tree.xpath(('//*[@id="ctl00_ctl00_cphRoblox_cphMyRobloxContent_ctl00_OpenBids_OpenBidsU'
                           'pdatePanel"]/table/tr[2]/td[2]/text()'))
@@ -76,8 +74,8 @@ def cancel(num):
         Profit -= int(Rremain[0])
     except Exception as ex:
         print(ex)
-    s.post(url, data=values2)
-    s.post(url, data=values3)
+    s.post(TCUrl, data=values2)
+    s.post(TCUrl, data=values3)
 
 
 def submit(toTrade, fromC, get, toC):
@@ -93,7 +91,7 @@ def submit(toTrade, fromC, get, toC):
     :param toC: Currency you are convering TO, IE "Robux" or "Tickets"
     :type toC: str
     """
-    state, event = getValidation(url)
+    state, event = getValidation(TCUrl)
     values['__VIEWSTATE'] = state
     values['__EVENTVALIDATION'] = event
     values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$HaveAmountTextBoxRestyle'] = toTrade
@@ -101,14 +99,12 @@ def submit(toTrade, fromC, get, toC):
     values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$WantAmountTextBox'] = get
     values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$WantCurrencyDropDownList'] = toC
 
-    Session.post(url, data=values)
+    Session.post(TCUrl, data=values)
 
 
 def calculate(mode):
     """
     Where the trade/profit "calculation" happens
-
-    BWHAHAHAHAHA this shit SUCKED but everyone else made money from my bot and i never had the patience LOL
 
     :param mode: What direction to calculate
     :type mode: str
