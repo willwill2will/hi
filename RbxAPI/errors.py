@@ -11,6 +11,32 @@ Copyright (C) 2015  Diana Land
 Read LICENSE for more information
 """
 
+import sys
+
+
+def excHandler(exception_type, exception, traceback, debug_hook=sys.excepthook):
+    """
+    Handle proper exceptions being displayed.
+
+    :param exception_type:
+    :type exception_type:
+    :param exception:
+    :type exception:
+    :param traceback:
+    :type traceback:
+    :param debug_hook:
+    :type debug_hook:
+    :return:
+    :rtype:
+    """
+    if False:  # TODO: Add a debug flag?
+        debug_hook(exception_type, exception, traceback)
+    else:
+        print("{0}: {1}".format(exception_type.__name__, exception))
+
+
+sys.excepthook = excHandler
+
 
 class Iaz3Error(Exception):
     """
@@ -44,7 +70,7 @@ class InvalidException(Iaz3Error):
     Throws when the exception is invalid.
     """
 
-    def __init__(self, msg):
+    def __init__(self, msg=None):
         self.msg = msg or 'This exception is the result of an unexpected error. Please contact Iaz3.'
         self.errcode = 5
 
@@ -53,6 +79,7 @@ class InvalidException(Iaz3Error):
 
     def __repr__(self):
         return "<{0}> {1}".format(self.__class__.__name__, self.__dict__ or '')
+
 
 class LoginError(Iaz3Error):
     """
@@ -73,6 +100,7 @@ class LoginError(Iaz3Error):
 
     def __repr__(self):
         return "<{0}> {1}".format(self.__class__.__name__, self.__dict__ or '')
+
 
 class SetupError(Iaz3Error):
     """
