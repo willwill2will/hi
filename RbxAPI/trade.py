@@ -15,8 +15,9 @@ import json
 import re
 
 from lxml import html
+from suds.client import Client
 
-from RbxAPI import CurrencyURL, TCUrl, Session
+from RbxAPI import CurrencyURL, TCUrl, Session, EstimateURL
 
 
 def getCash():
@@ -111,3 +112,28 @@ def getSpread():
     spread = tree.xpath("//*[@id='CurrencyQuotePane']/div[1]/div[1]/div[4]/text()")
     print('Spread is: ' + str(spread))
     return int(spread[0])
+
+
+def getTixEstimate(ticketsToTrade):
+    """
+    Get the current market estimate for a given value of Tickets to Robux
+
+    :param ticketsToTrade: Amount of Tickets.
+    :type ticketsToTrade: int
+    :return: The estimated Robux to be received.
+    :rtype: int
+    """
+    client = Client(EstimateURL)
+    return int(client.service.GetEstimatedTradeReturnForTickets(ticketsToTrade))
+
+def getBuxEstimate(robuxToTrade):
+    """
+    Get the current market estimate for a given value of Tickets to Robux
+
+    :param robuxToTrade: Amount of Robux.
+    :type robuxToTrade: int
+    :return: The estimated Tickets to be received.
+    :rtype: int
+    """
+    client = Client(EstimateURL)
+    return int(client.service.GetEstimatedTradeReturnForRobux(robuxToTrade))

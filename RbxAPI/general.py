@@ -45,7 +45,7 @@ def _SetLoggedIn(value, user=None):
         LoggedInUser = user
 
 
-def rbxToken(element):
+def _rbxToken(element):
     """
     Parses HTML for ROBLOX XsrfToken.
 
@@ -57,7 +57,8 @@ def rbxToken(element):
     :rtype: bool
     """
     if element.name.lower() == "script":
-        if re.match(r"Roblox\.XsrfToken.*", element.text, re.IGNORECASE):
+        # FIXME: Make sure the ignore whitespace at beggining works.
+        if re.match(r"^\s*Roblox\.XsrfToken\.setToken.*", element.text, re.IGNORECASE):
             return True
     return False
 
@@ -70,8 +71,9 @@ def GetToken():
     :rtype: str
     """
     Token = BeautifulSoup(Session.get('http://www.roblox.com/user.aspx').text, "lxml")
-    Token = Token.find_all(rbxToken)
-    Token = re.findall(r"\((.*)\)", Token[0].text)[0]
+    Token = Token.find_all(_rbxToken)
+    Token = re.findall(r"\((.*)\)", Token[0].text)[0]  # FIXME: Will error if Token is broken. It shouldent break,
+    # though.
     Token = re.sub("'", '', Token)
     return Token
 

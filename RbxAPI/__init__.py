@@ -11,7 +11,7 @@ Read LICENSE for more information
 
 # Internal
 __author__ = 'Diana'
-__version__ = '2.0.2'
+__version__ = '2.0.3'
 
 import os
 import sys
@@ -27,6 +27,7 @@ TCUrl = "http://www.roblox.com/My/Money.aspx"
 CurrencyURL = "http://api.roblox.com/currency/balance"
 CheckURL = "http://www.roblox.com/home"
 LoginURL = "https://www.roblox.com/newlogin"
+EstimateURL = "http://www.roblox.com/Marketplace/EconomyServices.asmx?WSDL"
 
 # Requests CA. Required for freezing. Internal.
 if getattr(sys, 'frozen', False):
