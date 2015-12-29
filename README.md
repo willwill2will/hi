@@ -29,9 +29,12 @@
 
 ### Who do I talk to? ###
 
-* Diana. Iaz3 on ROBLOX. Email: crazykilla15@gmail.com
+* Diana.
+> Iaz3 on ROBLOX.
+> Email: crazykilla15@gmail.com
+> Twitter: @Hugs4Diana
 * Other community or team contact
 
 ### More Info ###
 
-* Check the wiki
+* Check the wiki!
