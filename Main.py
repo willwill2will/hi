@@ -16,7 +16,7 @@ from lxml import html
 from colorama import init, deinit, Fore
 
 from RbxAPI import getpass, getnum, getValidation, TCUrl, getCash, getSpread, getRate, login, listAccounts, \
-    loadAccounts, writeConfig, readConfig, checkTrades, general, pause, Session
+    loadAccounts, writeConfig, readConfig, checkTrades, general, pause, Session, getBuxEstimate, getTixEstimate
 from RbxAPI.errors import LoginError, Iaz3Error, SetupError, InvalidException
 
 if getattr(sys, 'frozen', False):
@@ -78,26 +78,30 @@ def cancel(num):
     s.post(TCUrl, data=values3)
 
 
-def submit(toTrade, fromC, get, toC):
+def submit(toTrade, fromCurrency, AmountReceive, toCurrency, Fast=False):
     """
     Submit a trade to ROBLOX.
 
     :param toTrade: Money going in, IE to trade
     :type toTrade: int
-    :param fromC: Currency you are converting FROM, IE "Robux" or "Tickets"
-    :type fromC: str
-    :param get: What you expect to get in return.
-    :type get: int
-    :param toC: Currency you are convering TO, IE "Robux" or "Tickets"
-    :type toC: str
+    :param fromCurrency: Currency you are converting FROM, IE "Robux" or "Tickets"
+    :type fromCurrency: str
+    :param AmountReceive: What you expect to get in return.
+    :type AmountReceive: int
+    :param toCurrency: Currency you are convering TO, IE "Robux" or "Tickets"
+    :type toCurrency: str
+    :param Fast:
+    :type Fast:
     """
+    if Fast:
+        values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$OrderType'] = 'MarketOrderRadioButton'
     state, event = getValidation(TCUrl)
     values['__VIEWSTATE'] = state
     values['__EVENTVALIDATION'] = event
     values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$HaveAmountTextBoxRestyle'] = toTrade
-    values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$HaveCurrencyDropDownList'] = fromC
-    values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$WantAmountTextBox'] = get
-    values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$WantCurrencyDropDownList'] = toC
+    values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$HaveCurrencyDropDownList'] = fromCurrency
+    values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$WantAmountTextBox'] = AmountReceive
+    values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$WantCurrencyDropDownList'] = toCurrency
 
     Session.post(TCUrl, data=values)
 
@@ -156,7 +160,34 @@ def FastCalculate():
     :return:
     :rtype:
     """
-    pass
+    global lastTix
+    global lastBux
+    global Profit
+    bux, tix = getCash()
+    if bux > 0:  # Bux to Tix.
+        lastBux = bux
+        want = getBuxEstimate(bux)
+        while True:
+            bux -= 1
+            if getBuxEstimate(bux) < want:
+                bux += 1
+                break
+        if want > (lastTix + 20):
+            print("Getting {0} Tickets".format(want))
+            submit(bux, 'Robux', want, 'Tickets', Fast=True)
+            print('Trade Submitted')
+    else:
+        lastTix = tix
+        want = getTixEstimate(tix)
+        while True:
+            tix -= 1
+            if getTixEstimate(tix) < want:
+                tix += 1
+                break
+        if want > lastBux:
+            print("Getting {0} Robux".format(want))
+            submit(tix, 'Tickets', want, 'Robux', Fast=True)
+            print('Trade Submitted')
 
 
 def _mode():
@@ -166,14 +197,15 @@ def _mode():
     :return: Trading Mode. True means Default. False means FAST.
     :rtype: bool
     """
-    init(autoreset=True)
+    init()
     print(Fore.WHITE + '   1: Default Trading')
-    print(Fore.WHITE + '   1: Fast Trading™')
+    print(Fore.WHITE + '   2: Fast Trading')
     choice = getnum()
     if choice == 1:
         return True
     elif choice == 2:
         return False
+    deinit()
 
 
 def setup():
@@ -235,6 +267,8 @@ def main(Mode):
         while 1:
             writeConfig({'LastBuxFAST': lastBux, 'LastTixFAST': lastTix, 'ProfitFAST': Profit})
             FastCalculate()
+            # TODO: Waiting text like above.
+            # TODO: Log of trades and profits.
             print('____________')
             time.sleep(5)
 
@@ -251,7 +285,7 @@ def closing():
 
 
 if __name__ == '__main__':
-    print('Trade Currency Bot made by Iaz3, offically distrubuted on reddit/bitbucket via MEGA BOT IS PROVIDED AS IS.')
+    print('Trade Currency Bot made by Iaz3, offically distrubuted on reddit/bitbucket via MEGA. BOT IS PROVIDED AS IS.')
     print("ROBLOX TCBot version " + version + ", Copyright (C) 2015 Diana"
                                               "\nROBLOX TCBot comes with ABSOLUTELY NO WARRANTY; for details, "
                                               "refer to the LICENSE file."
