@@ -21,7 +21,7 @@ from RbxAPI.errors import LoginError, Iaz3Error, SetupError, InvalidException
 
 if getattr(sys, 'frozen', False):
     os.environ["REQUESTS_CA_BUNDLE"] = os.path.abspath(
-        os.path.join(os.path.abspath(sys.argv[0]), os.pardir, "cacert.pem"))
+            os.path.join(os.path.abspath(sys.argv[0]), os.pardir, "cacert.pem"))
 
 values = {
     'ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$OrderType': 'LimitOrderRadioButton',
@@ -29,7 +29,7 @@ values = {
     '__EVENTTARGET': 'ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$SubmitTradeButton'
 }
 
-version = '2.0.2'
+version = '2.0.3'
 
 
 # noinspection PyUnusedLocal,PyUnreachableCode
@@ -149,13 +149,40 @@ def calculate(mode):
             print('Trade Submitted')
 
 
+def FastCalculate():
+    """
+    Fast Trade calculations happen here.
+
+    :return:
+    :rtype:
+    """
+    pass
+
+
+def _mode():
+    """
+    What Trading Mode?
+
+    :return: Trading Mode. True means Default. False means FAST.
+    :rtype: bool
+    """
+    init(autoreset=True)
+    print(Fore.WHITE + '   1: Default Trading')
+    print(Fore.WHITE + '   1: Fast Trading™')
+    choice = getnum()
+    if choice == 1:
+        return True
+    elif choice == 2:
+        return False
+
+
 def setup():
     """
     Setup the bot.
 
     :raises: SetupError, LoginError
     """
-    init()
+    init(autoreset=True)
     print(Fore.WHITE + '   1: Log In?')
     print(Fore.WHITE + '   2: Load Account?')
     # x = 0
@@ -186,23 +213,30 @@ def setup():
     deinit()
 
 
-def main():
+def main(Mode):
     """
     The main function.
     It all starts here
     """
-    while 1:
-        writeConfig({'LastBux': lastBux, 'LastTix': lastTix, 'Profit': Profit})
-        while not (checkTrades()):
-            print('Wait', end='\r')
-            time.sleep(10)
-        bux, tix = getCash()  # Money
-        if bux:
-            calculate('BuxToTix')
-        elif tix:
-            calculate('TixToBux')
-        print('____________')
-        time.sleep(5)
+    if Mode:
+        while 1:
+            writeConfig({'LastBux': lastBux, 'LastTix': lastTix, 'Profit': Profit})
+            while not (checkTrades()):
+                print('Wait', end='\r')
+                time.sleep(10)
+            bux, tix = getCash()  # Money
+            if bux:
+                calculate('BuxToTix')
+            elif tix:
+                calculate('TixToBux')
+            print('____________')
+            time.sleep(5)
+    else:
+        while 1:
+            writeConfig({'LastBuxFAST': lastBux, 'LastTixFAST': lastTix, 'ProfitFAST': Profit})
+            FastCalculate()
+            print('____________')
+            time.sleep(5)
 
 
 @atexit.register
@@ -219,19 +253,26 @@ def closing():
 if __name__ == '__main__':
     print('Trade Currency Bot made by Iaz3, offically distrubuted on reddit/bitbucket via MEGA BOT IS PROVIDED AS IS.')
     print("ROBLOX TCBot version " + version + ", Copyright (C) 2015 Diana"
-          "\nROBLOX TCBot comes with ABSOLUTELY NO WARRANTY; for details, refer to the LICENSE file."
-          "\nThis is free software, and you are welcome to redistribute it "
-          "under certain conditions; read the LICENSE file for details.")
+                                              "\nROBLOX TCBot comes with ABSOLUTELY NO WARRANTY; for details, "
+                                              "refer to the LICENSE file."
+                                              "\nThis is free software, and you are welcome to redistribute it "
+                                              "under certain conditions; read the LICENSE file for details.")
     try:
         setup()
         deinit()
         global Profit
         global lastTix
         global lastBux
-        Profit = int(readConfig(general.LoggedInUser, 'Profit'))
-        lastTix = int(readConfig(general.LoggedInUser, 'lastTix'))
-        lastBux = int(readConfig(general.LoggedInUser, 'lastBux'))
-        main()
+        if _mode():
+            Profit = int(readConfig(general.LoggedInUser, 'Profit'))
+            lastTix = int(readConfig(general.LoggedInUser, 'lastTix'))
+            lastBux = int(readConfig(general.LoggedInUser, 'lastBux'))
+            main(True)
+        else:
+            Profit = int(readConfig(general.LoggedInUser, 'ProfitFAST'))
+            lastTix = int(readConfig(general.LoggedInUser, 'lastTixFAST'))
+            lastBux = int(readConfig(general.LoggedInUser, 'lastBuxFAST'))
+            main(False)
     except KeyboardInterrupt:
         pass
     except EOFError:
