@@ -164,7 +164,7 @@ def FastCalculate():
     global lastBux
     global Profit
     bux, tix = getCash()
-    if bux > 0:  # Bux to Tix.
+    if bux:  # Bux to Tix.
         lastBux = bux
         want = getBuxEstimate(bux)
         while True:
@@ -172,11 +172,17 @@ def FastCalculate():
             if getBuxEstimate(bux) < want:
                 bux += 1
                 break
-        if want > (lastTix + 20):
+        if want != getBuxEstimate(bux):
+            FastCalculate()
+            return
+        if (lastTix + tix) >= (lastTix + 20):
+            GetTix = lastTix + tix
+        else:
+            GetTix = lastTix + (20 - tix)
+        if want > GetTix:
             print("Getting {0} Tickets".format(want))
             submit(bux, 'Robux', want, 'Tickets', Fast=True)
-            print('Trade Submitted')
-    else:
+    elif tix:  # Tix to bux
         lastTix = tix
         want = getTixEstimate(tix)
         while True:
@@ -184,10 +190,12 @@ def FastCalculate():
             if getTixEstimate(tix) < want:
                 tix += 1
                 break
+        if want != getTixEstimate(tix):
+            FastCalculate()
+            return
         if want > lastBux:
             print("Getting {0} Robux".format(want))
             submit(tix, 'Tickets', want, 'Robux', Fast=True)
-            print('Trade Submitted')
 
 
 def _mode():
@@ -249,6 +257,9 @@ def main(Mode):
     """
     The main function.
     It all starts here
+
+    :param Mode:
+    :type Mode:
     """
     if Mode:
         while 1:
@@ -267,9 +278,9 @@ def main(Mode):
         while 1:
             writeConfig({'LastBuxFAST': lastBux, 'LastTixFAST': lastTix, 'ProfitFAST': Profit})
             FastCalculate()
-            # TODO: Waiting text like above.
             # TODO: Log of trades and profits.
-            print('____________')
+            # FIXME: Somewhere around here it can error,
+            print('Wait', end='\r')
             time.sleep(5)
 
 
