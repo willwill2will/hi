@@ -14,7 +14,8 @@
 * Download and install TCBot from [here](https://bitbucket.org/Iaz3/tcbot/wiki/Downloads)
 > A shortcut will be created on the desktop, running it will start the program.
 > NOTE: You only need the below Dependencies if you are NOT using the EXE
-* Configuration: config.ini (broke)
+* Configuration: config.ini
+> Located at %appdata%\Iaz3Programs\TCBot on windows.
 * Dependencies: **Python 3.x**, LXML, Requests, Beautifulsoup 4, and colorama.
 * Build Dependencies: Cx_Freeze is needed **in addition to** the above to build.
 * How to run tests: No Tests
