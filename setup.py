@@ -58,9 +58,8 @@ shortcut_table = [
 
 msi_data = {"Shortcut": shortcut_table}
 
-# noinspection PyUnresolvedReferences
 build_exe_options = {
-    "include_files": [(requests.certs.where(), 'cacert.pem'), 'TCInfo.txt'],
+    "include_files": [(requests.certs.where(), 'cacert.pem')],
     'includes': ['lxml.etree', 'lxml._elementpath', 'gzip', ], 'packages': ['os', 'RbxAPI', ], 'include_msvcr': True
 }
 
@@ -70,7 +69,7 @@ bdist_msi_options = {
 
 app = Executable("Main.py", targetName='TCBot.exe', icon="TCicon.ico", )
 
-ver = '2.0.2'
+ver = '2.0.3'
 setup(name="Trade Currency Bot", author='Iaz3', author_email='CrazyKilla15@gmail.com', version=ver,
       description="Iaz3's Trade Currency Bot for Roblox",
       options={"build_exe": build_exe_options, 'bdist_msi': bdist_msi_options}, executables=[app])
