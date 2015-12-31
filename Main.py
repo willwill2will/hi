@@ -175,13 +175,17 @@ def FastCalculate():
         if want != getBuxEstimate(bux):
             FastCalculate()
             return
+        # FIXME: This doesnt work. LastTix gets overwritten, so yeah?????
         if (lastTix + tix) >= (lastTix + 20):
             GetTix = lastTix + tix
         else:
             GetTix = lastTix + (20 - tix)
         if want > GetTix:
-            print("Getting {0} Tickets".format(want))
-            submit(bux, 'Robux', want, 'Tickets', Fast=True)
+            if getBuxEstimate(bux) == want:
+                print("Getting {0} Tickets".format(want))
+                submit(bux, 'Robux', want, 'Tickets', Fast=True)
+            else:
+                FastCalculate()
     elif tix:  # Tix to bux
         lastTix = tix
         want = getTixEstimate(tix)
@@ -194,8 +198,11 @@ def FastCalculate():
             FastCalculate()
             return
         if want > lastBux:
-            print("Getting {0} Robux".format(want))
-            submit(tix, 'Tickets', want, 'Robux', Fast=True)
+            if getTixEstimate(tix) == want:
+                print("Getting {0} Robux".format(want))
+                submit(tix, 'Tickets', want, 'Robux', Fast=True)
+            else:
+                FastCalculate()
 
 
 def _mode():
@@ -319,8 +326,6 @@ if __name__ == '__main__':
             lastBux = int(readConfig(general.LoggedInUser, 'lastBuxFAST'))
             main(False)
     except KeyboardInterrupt:
-        pass
-    except EOFError:
         pass
     except InvalidException:
         raise
