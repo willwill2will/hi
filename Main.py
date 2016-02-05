@@ -17,7 +17,7 @@ from colorama import init, deinit, Fore
 
 from RbxAPI import getpass, getnum, getValidation, TCUrl, getCash, getSpread, getRate, login, listAccounts, \
     loadAccounts, writeConfig, readConfig, checkTrades, general, pause, Session, getBuxEstimate, getTixEstimate
-from RbxAPI.errors import LoginError, Iaz3Error, SetupError, InvalidException
+from RbxAPI.errors import NoAccountsError, Iaz3Error, SetupError, InvalidException
 
 if getattr(sys, 'frozen', False):
     os.environ["REQUESTS_CA_BUNDLE"] = os.path.abspath(
@@ -122,7 +122,7 @@ def calculate(mode):
         print("Bad spread")
         print("This is experimental. Report problems with it.")
         return
-    # TODO: fix spread
+    # TODO: fix spread. Add differance checking?
     global lastTix
     global lastBux
     global Profit
@@ -248,7 +248,7 @@ def setup():
     elif choice == 2:
         accounts = listAccounts()
         if not accounts:
-            raise LoginError('No accounts have been saved, cannot continue.', 2001)
+            raise NoAccountsError()
         for acc in accounts:
             print('Accounts:')
             print(Fore.YELLOW + '*  ' + acc)
