@@ -129,8 +129,6 @@ def calculate(mode):
         print("This is experimental. Report problems with it.")
         return
     # TODO: fix spread. Add differance checking?
-    global lastTix
-    global lastBux
     if mode == 'TixToBux':
         lastTix = tix
         if spread > 0:
@@ -157,53 +155,47 @@ def calculate(mode):
             print('Trade Submitted')
 
 
-def FastCalculate():
+def FastCalculate(lastTix=0, lastBux=0):
     """
     Fast Trade calculations happen here.
 
+    :param lastBux:
+    :type lastBux:
+    :param lastTix:
+    :type lastTix:
     """
-    global lastTix
-    global lastBux
-    bux, tix = getCash()
-    if bux:  # Bux to Tix.
-        lastBux = bux
-        want = getBuxToTixEstimate(bux)
-        while True:
-            bux -= 1
-            if getBuxToTixEstimate(bux) < want:
-                bux += 1
-                break
-        if want != getBuxToTixEstimate(bux):
-            FastCalculate()
-            return
-        # FIXME: This doesnt work. LastTix gets overwritten, so yeah?????
-        if (lastTix + tix) >= (lastTix + 20):
-            GetTix = lastTix + tix
-        else:
-            GetTix = lastTix + (20 - tix)
-        if want > GetTix:
-            if getBuxToTixEstimate(bux) == want:
-                print("Getting {0} Tickets".format(want))
-                SubmitTrade(bux, 'Robux', want, 'Tickets', Fast=True)
-            else:
-                FastCalculate()
-    elif tix:  # Tix to bux
-        lastTix = tix
-        want = getTixToBuxEstimate(tix)
-        while True:
-            tix -= 1
-            if getTixToBuxEstimate(tix) < want:
-                tix += 1
-                break
-        if want != getTixToBuxEstimate(tix):
-            FastCalculate()
-            return
-        if want > lastBux:
-            if getTixToBuxEstimate(tix) == want:
-                print("Getting {0} Robux".format(want))
-                SubmitTrade(tix, 'Tickets', want, 'Robux', Fast=True)
-            else:
-                FastCalculate()
+    lastTix, lastBux = lastTix, lastBux
+    while True:
+        bux, tix = getCash()
+        if bux:  # Bux to Tix.
+            lastBux = bux
+            want = getBuxToTixEstimate(bux)
+            while True:  # Calculates minimum required robux required to get same amount of tix.
+                bux -= 1
+                if getBuxToTixEstimate(bux) < want:
+                    bux += 1
+                    break
+            GetTix = lastTix + 20  # FIXME: Expand on this, accounting for extra tix made last time.
+            if want > GetTix:
+                if getBuxToTixEstimate(bux) >= want:  # Make sure still getting the same, correct, amount.
+                    print("Getting {0} Tickets".format(want))
+                    SubmitTrade(bux, 'Robux', want, 'Tickets', Fast=True)
+                else:
+                    FastCalculate(lastTix, lastBux)
+        elif tix:  # Tix to bux
+            lastTix = tix
+            want = getTixToBuxEstimate(tix)
+            while True:  # Calculates minimum required tickets required to get same amount of robux.
+                tix -= 1
+                if getTixToBuxEstimate(tix) < want:
+                    tix += 1
+                    break
+            if want > lastBux:
+                if getTixToBuxEstimate(tix) >= want:
+                    print("Getting {0} Robux".format(want))
+                    SubmitTrade(tix, 'Tickets', want, 'Robux', Fast=True)
+                else:
+                    FastCalculate(lastTix, lastBux)
 
 
 def _mode():
@@ -282,15 +274,9 @@ def main():
             print('____________')
             time.sleep(5)
     else:  # Fast Trade
-        lastTix = int(readConfig(general.LoggedInUser, 'lastTixFAST'))
-        lastBux = int(readConfig(general.LoggedInUser, 'lastBuxFAST'))
-        while 1:
-            writeConfig({'LastBuxFAST': lastBux, 'LastTixFAST': lastTix})
-            FastCalculate()
-            # TODO: Log of trades and profits.
-            # FIXME: Somewhere around here it can error,
-            print('Wait', end='\r')
-            time.sleep(5)
+        FastCalculate()
+        # TODO: Log of trades and profits.
+        # FIXME: Somewhere around here it can error,
 
 
 @atexit.register
