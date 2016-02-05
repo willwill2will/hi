@@ -13,15 +13,22 @@ import atexit
 import sys
 
 from lxml import html
-from colorama import init, deinit, Fore
+from colorama import init, deinit, Fore, reinit
 
 from RbxAPI import getpass, getnum, getValidation, TCUrl, getCash, getSpread, getRate, login, listAccounts, \
-    loadAccounts, writeConfig, readConfig, checkTrades, general, pause, Session, getBuxEstimate, getTixEstimate
+    loadAccounts, writeConfig, readConfig, checkTrades, general, pause, Session, getBuxToTixEstimate, \
+    getTixToBuxEstimate
 from RbxAPI.errors import NoAccountsError, Iaz3Error, SetupError, InvalidException
 
 if getattr(sys, 'frozen', False):
     os.environ["REQUESTS_CA_BUNDLE"] = os.path.abspath(
-            os.path.join(os.path.abspath(sys.argv[0]), os.pardir, "cacert.pem"))
+        os.path.join(os.path.abspath(sys.argv[0]), os.pardir, "cacert.pem"))
+
+Banner = """Trade Currency Bot made by Iaz3, offically distrubuted on reddit/bitbucket via MEGA. BOT IS PROVIDED AS IS.
+ROBLOX TCBot version {0}, Copyright (C) 2015 Diana
+ROBLOX TCBot comes with ABSOLUTELY NO WARRANTY; for details, refer to the LICENSE file.
+This is free software, and you are welcome to redistribute it under certain conditions; read the LICENSE file for details.
+"""
 
 values = {
     'ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$OrderType': 'LimitOrderRadioButton',
@@ -29,7 +36,7 @@ values = {
     '__EVENTTARGET': 'ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$SubmitTradeButton'
 }
 
-version = '2.0.3'
+version = '2.0.4'
 
 
 # noinspection PyUnusedLocal,PyUnreachableCode
@@ -41,7 +48,6 @@ def cancel(num):
     :param num: Trade number to delete, starting at zero. Currently not used.
     """
     raise NotImplementedError
-    global Profit
     state, event = getValidation(TCUrl)
     # tra = str(c)  # what to cancel. starts at 0, goes +1
     values2 = {
@@ -71,14 +77,13 @@ def cancel(num):
                           'OpenOffersUpdatePanel"]/table/tr[2]/td[2]/text()'))
     try:
         print('Remaining: ' + str(Rremain[0]))
-        Profit -= int(Rremain[0])
     except Exception as ex:
         print(ex)
     s.post(TCUrl, data=values2)
     s.post(TCUrl, data=values3)
 
 
-def submit(toTrade, fromCurrency, AmountReceive, toCurrency, Fast=False):
+def SubmitTrade(toTrade, fromCurrency, AmountReceive, toCurrency, Fast=False):
     """
     Submit a trade to ROBLOX.
 
@@ -90,9 +95,10 @@ def submit(toTrade, fromCurrency, AmountReceive, toCurrency, Fast=False):
     :type AmountReceive: int
     :param toCurrency: Currency you are convering TO, IE "Robux" or "Tickets"
     :type toCurrency: str
-    :param Fast:
-    :type Fast:
+    :param Fast: Whether using FastTrade
+    :type Fast: bool
     """
+    # If FastTrade, we need to use a Market Order
     if Fast:
         values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$OrderType'] = 'MarketOrderRadioButton'
     state, event = getValidation(TCUrl)
@@ -125,7 +131,6 @@ def calculate(mode):
     # TODO: fix spread. Add differance checking?
     global lastTix
     global lastBux
-    global Profit
     if mode == 'TixToBux':
         lastTix = tix
         if spread > 0:
@@ -136,8 +141,7 @@ def calculate(mode):
         print('Getting: ' + str(want) + ' Bux')
         if want > lastBux:
             print('Robux Profit: ' + str(want - lastBux))
-            Profit += want - lastBux
-            submit(tix, 'Tickets', want, 'Robux')
+            SubmitTrade(tix, 'Tickets', want, 'Robux')
             print('Trade Submitted')
     elif mode == 'BuxToTix':
         lastBux = bux
@@ -149,7 +153,7 @@ def calculate(mode):
         print('Getting: ' + str(want) + ' Tix')
         if want > (lastTix + 20):  # 20 profit
             print('Tickets Profit: ' + str(want - lastTix))
-            submit(bux, 'Robux', want, 'Tickets')
+            SubmitTrade(bux, 'Robux', want, 'Tickets')
             print('Trade Submitted')
 
 
@@ -157,22 +161,19 @@ def FastCalculate():
     """
     Fast Trade calculations happen here.
 
-    :return:
-    :rtype:
     """
     global lastTix
     global lastBux
-    global Profit
     bux, tix = getCash()
     if bux:  # Bux to Tix.
         lastBux = bux
-        want = getBuxEstimate(bux)
+        want = getBuxToTixEstimate(bux)
         while True:
             bux -= 1
-            if getBuxEstimate(bux) < want:
+            if getBuxToTixEstimate(bux) < want:
                 bux += 1
                 break
-        if want != getBuxEstimate(bux):
+        if want != getBuxToTixEstimate(bux):
             FastCalculate()
             return
         # FIXME: This doesnt work. LastTix gets overwritten, so yeah?????
@@ -181,26 +182,26 @@ def FastCalculate():
         else:
             GetTix = lastTix + (20 - tix)
         if want > GetTix:
-            if getBuxEstimate(bux) == want:
+            if getBuxToTixEstimate(bux) == want:
                 print("Getting {0} Tickets".format(want))
-                submit(bux, 'Robux', want, 'Tickets', Fast=True)
+                SubmitTrade(bux, 'Robux', want, 'Tickets', Fast=True)
             else:
                 FastCalculate()
     elif tix:  # Tix to bux
         lastTix = tix
-        want = getTixEstimate(tix)
+        want = getTixToBuxEstimate(tix)
         while True:
             tix -= 1
-            if getTixEstimate(tix) < want:
+            if getTixToBuxEstimate(tix) < want:
                 tix += 1
                 break
-        if want != getTixEstimate(tix):
+        if want != getTixToBuxEstimate(tix):
             FastCalculate()
             return
         if want > lastBux:
-            if getTixEstimate(tix) == want:
+            if getTixToBuxEstimate(tix) == want:
                 print("Getting {0} Robux".format(want))
-                submit(tix, 'Tickets', want, 'Robux', Fast=True)
+                SubmitTrade(tix, 'Tickets', want, 'Robux', Fast=True)
             else:
                 FastCalculate()
 
@@ -212,7 +213,7 @@ def _mode():
     :return: Trading Mode. True means Default. False means FAST.
     :rtype: bool
     """
-    init()
+    reinit()
     print(Fore.WHITE + '   1: Default Trading')
     print(Fore.WHITE + '   2: Fast Trading')
     choice = getnum()
@@ -227,9 +228,9 @@ def setup():
     """
     Setup the bot.
 
-    :raises: SetupError, LoginError
+    :raises: SetupError, NoAccountsError
     """
-    init(autoreset=True)
+    init(convert=True)
     print(Fore.WHITE + '   1: Log In?')
     print(Fore.WHITE + '   2: Load Account?')
     # x = 0
@@ -260,17 +261,16 @@ def setup():
     deinit()
 
 
-def main(Mode):
+def main():
     """
     The main function.
     It all starts here
-
-    :param Mode:
-    :type Mode:
     """
-    if Mode:
+    if _mode():
+        lastTix = int(readConfig(general.LoggedInUser, 'lastTix'))
+        lastBux = int(readConfig(general.LoggedInUser, 'lastBux'))
         while 1:
-            writeConfig({'LastBux': lastBux, 'LastTix': lastTix, 'Profit': Profit})
+            writeConfig({'LastBux': lastBux, 'LastTix': lastTix})
             while not (checkTrades()):
                 print('Wait', end='\r')
                 time.sleep(10)
@@ -281,9 +281,11 @@ def main(Mode):
                 calculate('TixToBux')
             print('____________')
             time.sleep(5)
-    else:
+    else:  # Fast Trade
+        lastTix = int(readConfig(general.LoggedInUser, 'lastTixFAST'))
+        lastBux = int(readConfig(general.LoggedInUser, 'lastBuxFAST'))
         while 1:
-            writeConfig({'LastBuxFAST': lastBux, 'LastTixFAST': lastTix, 'ProfitFAST': Profit})
+            writeConfig({'LastBuxFAST': lastBux, 'LastTixFAST': lastTix})
             FastCalculate()
             # TODO: Log of trades and profits.
             # FIXME: Somewhere around here it can error,
@@ -303,28 +305,11 @@ def closing():
 
 
 if __name__ == '__main__':
-    print('Trade Currency Bot made by Iaz3, offically distrubuted on reddit/bitbucket via MEGA. BOT IS PROVIDED AS IS.')
-    print("ROBLOX TCBot version " + version + ", Copyright (C) 2015 Diana"
-                                              "\nROBLOX TCBot comes with ABSOLUTELY NO WARRANTY; for details, "
-                                              "refer to the LICENSE file."
-                                              "\nThis is free software, and you are welcome to redistribute it "
-                                              "under certain conditions; read the LICENSE file for details.")
+    print(Banner)
     try:
         setup()
         deinit()
-        global Profit
-        global lastTix
-        global lastBux
-        if _mode():
-            Profit = int(readConfig(general.LoggedInUser, 'Profit'))
-            lastTix = int(readConfig(general.LoggedInUser, 'lastTix'))
-            lastBux = int(readConfig(general.LoggedInUser, 'lastBux'))
-            main(True)
-        else:
-            Profit = int(readConfig(general.LoggedInUser, 'ProfitFAST'))
-            lastTix = int(readConfig(general.LoggedInUser, 'lastTixFAST'))
-            lastBux = int(readConfig(general.LoggedInUser, 'lastBuxFAST'))
-            main(False)
+        main()
     except KeyboardInterrupt:
         pass
     except InvalidException:
