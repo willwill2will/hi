@@ -16,7 +16,7 @@ from lxml import html
 from colorama import init, deinit, Fore, reinit
 
 from RbxAPI import getpass, getnum, getValidation, TCUrl, getCash, getSpread, getRate, login, listAccounts, \
-    loadAccounts, writeConfig, readConfig, checkTrades, general, pause, Session, getBuxToTixEstimate, \
+    loadAccounts, writeConfig, readConfig, IsTradeActive, general, pause, Session, getBuxToTixEstimate, \
     getTixToBuxEstimate
 from RbxAPI.errors import NoAccountsError, Iaz3Error, SetupError, InvalidException
 
@@ -93,7 +93,7 @@ def SubmitTrade(toTrade, fromCurrency, AmountReceive, toCurrency, Fast=False):
     :type fromCurrency: str
     :param AmountReceive: What you expect to get in return.
     :type AmountReceive: int
-    :param toCurrency: Currency you are convering TO, IE "Robux" or "Tickets"
+    :param toCurrency: Currency you are convering TO, IE "Tickets" or "Robux"
     :type toCurrency: str
     :param Fast: Whether using FastTrade
     :type Fast: bool
@@ -112,50 +112,49 @@ def SubmitTrade(toTrade, fromCurrency, AmountReceive, toCurrency, Fast=False):
     Session.post(TCUrl, data=values)
 
 
-def calculate(mode):
+def Calculate():
     """
     Where the trade/profit "calculation" happens
-
-    :param mode: What direction to calculate
-    :type mode: str
     """
-    bux, tix = getCash()  # Money
-    buxR, tixR = getRate()  # Rates
-    spread = getSpread()
-    if (buxR == 0.0000) or (tixR == 0.0000):
-        return
-    if not (spread < 10000) or (spread <= -10000):
-        print("Bad spread")
-        print("This is experimental. Report problems with it.")
-        return
-    # TODO: fix spread. Add differance checking?
-    if mode == 'TixToBux':
-        lastTix = tix
-        if spread > 0:
-            want = tix / (buxR + 0.05)
-        else:
-            want = tix / (tixR + 0.05)
-        want = int(math.floor(want))
-        print('Getting: ' + str(want) + ' Bux')
-        if want > lastBux:
-            print('Robux Profit: ' + str(want - lastBux))
-            SubmitTrade(tix, 'Tickets', want, 'Robux')
-            print('Trade Submitted')
-    elif mode == 'BuxToTix':
-        lastBux = bux
-        if spread > 0:
-            want = bux * (tixR - 0.02)
-        else:
-            want = bux * (buxR - 0.02)
-        want = int(math.floor(want))
-        print('Getting: ' + str(want) + ' Tix')
-        if want > (lastTix + 20):  # 20 profit
-            print('Tickets Profit: ' + str(want - lastTix))
-            SubmitTrade(bux, 'Robux', want, 'Tickets')
-            print('Trade Submitted')
+    lastBux, lastTix = getCash()
+    while True:
+        # waitTime = 0
+        while not (IsTradeActive()):
+            # waitTime += 1
+            # print("Progress {:2.1%}".format(waitTime / 10), end="\r")
+            print('Waiting for trade to go through.', end='\r')
+            time.sleep(10)
+        bux, tix = getCash()  # Money
+        buxRate, tixRate = getRate()
+        spread = getSpread()
+        if (buxRate == 0.0000) or (tixRate == 0.0000) or (abs(buxRate - tixRate) >= 10):
+            continue
+        # TODO: Very advanced caluclations, using new formula. Focus on tix and bux profit, not net.
+        if bux:  # Tix to Bux
+            tixWant = int(math.floor(bux / tixRate))
+            if tixWant > (lastTix + 20):
+                lastTix = tix
+                SubmitTrade(bux, "Tickets", tixWant, 'Robux')
+                print("Trade Submitted")
+        elif tix:
+            buxWant = int(math.floor(tix / buxRate))
+            tixCost = int(math.ceil(buxWant * buxRate))
+
+            buxProfit = buxWant - lastBux
+            tixProfit = lastTix - tixCost
+
+            print("Getting {0} Bux for {1} Tix with "
+                  "a potential profit of:\n{2} Robux\n{3} Tickets".format(buxWant, tixCost, buxProfit, tixProfit))
+
+            if buxProfit > lastBux and tixProfit > 0:
+                lastBux = bux
+                SubmitTrade(tixCost, 'Tickets', buxWant, 'Robux')
+                print('Trade Submitted')
+        print('____________')
+        time.sleep(5)
 
 
-def FastCalculate(lastTix=0, lastBux=0):
+def FastCalculate(lastTix=None, lastBux=None):
     """
     Fast Trade calculations happen here.
 
@@ -164,7 +163,10 @@ def FastCalculate(lastTix=0, lastBux=0):
     :param lastTix:
     :type lastTix:
     """
-    lastTix, lastBux = lastTix, lastBux
+    if lastTix is None and lastBux is None:
+        lastTix, lastBux = getCash()
+    else:
+        lastTix, lastBux = lastTix, lastBux
     while True:
         bux, tix = getCash()
         if bux:  # Bux to Tix.
@@ -225,9 +227,6 @@ def setup():
     init(convert=True)
     print(Fore.WHITE + '   1: Log In?')
     print(Fore.WHITE + '   2: Load Account?')
-    # x = 0
-    # x += 1
-    # print("Progress {:2.1%}".format(x / 10), end = "\r")
     choice = getnum()
     if not choice:
         raise SetupError()
@@ -259,20 +258,7 @@ def main():
     It all starts here
     """
     if _mode():
-        lastTix = int(readConfig(general.LoggedInUser, 'lastTix'))
-        lastBux = int(readConfig(general.LoggedInUser, 'lastBux'))
-        while 1:
-            writeConfig({'LastBux': lastBux, 'LastTix': lastTix})
-            while not (checkTrades()):
-                print('Wait', end='\r')
-                time.sleep(10)
-            bux, tix = getCash()  # Money
-            if bux:
-                calculate('BuxToTix')
-            elif tix:
-                calculate('TixToBux')
-            print('____________')
-            time.sleep(5)
+        Calculate()
     else:  # Fast Trade
         FastCalculate()
         # TODO: Log of trades and profits.
@@ -298,11 +284,3 @@ if __name__ == '__main__':
         main()
     except KeyboardInterrupt:
         pass
-    except InvalidException:
-        raise
-    except Iaz3Error as e:
-        print(e)
-    except Exception as e:
-        deinit()
-        print(str(e))
-        raise
