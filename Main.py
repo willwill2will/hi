@@ -15,7 +15,7 @@ import time
 from colorama import init, deinit, Fore, reinit
 from lxml import html
 
-from RbxAPI import getpass, GetNum, GetValidation, TC_URL, GetCash, GetSpread, GetRate, Login, ListAccounts, \
+from RbxAPI import GetPass, GetNum, GetValidation, TC_URL, GetCash, GetSpread, GetRate, Login, ListAccounts, \
     LoadAccounts, IsTradeActive, Pause, session, GetBuxToTixEstimate, GetTixToBuxEstimate
 from RbxAPI.errors import NoAccountsError, SetupError
 
@@ -26,7 +26,8 @@ if getattr(sys, 'frozen', False):
 Banner = """Trade Currency Bot made by Iaz3, offically distrubuted on reddit/bitbucket via MEGA. BOT IS PROVIDED AS IS.
 ROBLOX TCBot version {0}, Copyright (C) 2015 Diana
 ROBLOX TCBot comes with ABSOLUTELY NO WARRANTY; for details, refer to the LICENSE file.
-This is free software, and you are welcome to redistribute it under certain conditions; read the LICENSE file for details.
+This is free software, and you are welcome to redistribute it under certain conditions; read the LICENSE file for \
+details.
 """
 
 values = {
@@ -126,7 +127,7 @@ def Calculate():
             time.sleep(10)
         bux, tix = GetCash()  # Money
         buxRate, tixRate = GetRate()
-        spread = GetSpread()
+        # spread = GetSpread()
         if (buxRate == 0.0000) or (tixRate == 0.0000) or (abs(buxRate - tixRate) >= 10):
             continue
         # TODO: Very advanced caluclations, using new formula. Focus on tix and bux profit, not net.
@@ -214,7 +215,7 @@ def _mode():
         return True
     elif choice == 2:
         return False
-    deinit()
+    print(Fore.RESET + "")
 
 
 def setup():
@@ -234,7 +235,7 @@ def setup():
         while True:
             user = input('Username: ')
             if user:
-                Login(user, getpass())
+                Login(user, GetPass())
                 break
     elif choice == 2:
         accounts = ListAccounts()
@@ -279,7 +280,6 @@ if __name__ == '__main__':
     print(Banner)
     try:
         setup()
-        deinit()
         main()
     except KeyboardInterrupt:
         pass
