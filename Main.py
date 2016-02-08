@@ -36,7 +36,7 @@ values = {
     '__EVENTTARGET': 'ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$SubmitTradeButton'
 }
 
-version = '2.0.4'
+version = '2.0.3'
 
 
 # noinspection PyUnusedLocal,PyUnreachableCode
