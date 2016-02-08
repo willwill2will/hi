@@ -15,9 +15,9 @@ import sys
 from lxml import html
 from colorama import init, deinit, Fore, reinit
 
-from RbxAPI import getpass, getnum, getValidation, TCUrl, getCash, getSpread, getRate, login, listAccounts, \
-    loadAccounts, writeConfig, readConfig, IsTradeActive, general, pause, Session, getBuxToTixEstimate, \
-    getTixToBuxEstimate
+from RbxAPI import getpass, getnum, GetValidation, TCUrl, GetCash, GetSpread, GetRate, Login, ListAccounts, \
+    LoadAccounts, WriteConfig, ReadConfig, IsTradeActive, general, pause, Session, GetBuxToTixEstimate, \
+    GetTixToBuxEstimate
 from RbxAPI.errors import NoAccountsError, Iaz3Error, SetupError, InvalidException
 
 if getattr(sys, 'frozen', False):
@@ -48,7 +48,7 @@ def cancel(num):
     :param num: Trade number to delete, starting at zero. Currently not used.
     """
     raise NotImplementedError
-    state, event = getValidation(TCUrl)
+    state, event = GetValidation(TCUrl)
     # tra = str(c)  # what to cancel. starts at 0, goes +1
     values2 = {
         'ctl00$ctl00$ScriptManager': ('ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$OpenOffers$OpenOffersUpdat'
@@ -101,7 +101,7 @@ def SubmitTrade(toTrade, fromCurrency, AmountReceive, toCurrency, Fast=False):
     # If FastTrade, we need to use a Market Order
     if Fast:
         values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$OrderType'] = 'MarketOrderRadioButton'
-    state, event = getValidation(TCUrl)
+    state, event = GetValidation(TCUrl)
     values['__VIEWSTATE'] = state
     values['__EVENTVALIDATION'] = event
     values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$HaveAmountTextBoxRestyle'] = toTrade
@@ -116,7 +116,8 @@ def Calculate():
     """
     Where the trade/profit "calculation" happens
     """
-    lastBux, lastTix = getCash()
+    lastBux, lastTix = GetCash()
+    print("The bot has started. Do not fear if nothing is shown on screen. It is working")
     while True:
         # waitTime = 0
         while not (IsTradeActive()):
@@ -124,9 +125,9 @@ def Calculate():
             # print("Progress {:2.1%}".format(waitTime / 10), end="\r")
             print('Waiting for trade to go through.', end='\r')
             time.sleep(10)
-        bux, tix = getCash()  # Money
-        buxRate, tixRate = getRate()
-        spread = getSpread()
+        bux, tix = GetCash()  # Money
+        buxRate, tixRate = GetRate()
+        spread = GetSpread()
         if (buxRate == 0.0000) or (tixRate == 0.0000) or (abs(buxRate - tixRate) >= 10):
             continue
         # TODO: Very advanced caluclations, using new formula. Focus on tix and bux profit, not net.
@@ -150,7 +151,6 @@ def Calculate():
                 lastBux = bux
                 SubmitTrade(tixCost, 'Tickets', buxWant, 'Robux')
                 print('Trade Submitted')
-        print('____________')
         time.sleep(5)
 
 
@@ -164,36 +164,36 @@ def FastCalculate(lastTix=None, lastBux=None):
     :type lastTix:
     """
     if lastTix is None and lastBux is None:
-        lastTix, lastBux = getCash()
+        lastTix, lastBux = GetCash()
     else:
         lastTix, lastBux = lastTix, lastBux
     while True:
-        bux, tix = getCash()
+        bux, tix = GetCash()
         if bux:  # Bux to Tix.
             lastBux = bux
-            want = getBuxToTixEstimate(bux)
+            want = GetBuxToTixEstimate(bux)
             while True:  # Calculates minimum required robux required to get same amount of tix.
                 bux -= 1
-                if getBuxToTixEstimate(bux) < want:
+                if GetBuxToTixEstimate(bux) < want:
                     bux += 1
                     break
             GetTix = lastTix + 20  # FIXME: Expand on this, accounting for extra tix made last time.
             if want > GetTix:
-                if getBuxToTixEstimate(bux) >= want:  # Make sure still getting the same, correct, amount.
+                if GetBuxToTixEstimate(bux) >= want:  # Make sure still getting the same, correct, amount.
                     print("Getting {0} Tickets".format(want))
                     SubmitTrade(bux, 'Robux', want, 'Tickets', Fast=True)
                 else:
                     FastCalculate(lastTix, lastBux)
         elif tix:  # Tix to bux
             lastTix = tix
-            want = getTixToBuxEstimate(tix)
+            want = GetTixToBuxEstimate(tix)
             while True:  # Calculates minimum required tickets required to get same amount of robux.
                 tix -= 1
-                if getTixToBuxEstimate(tix) < want:
+                if GetTixToBuxEstimate(tix) < want:
                     tix += 1
                     break
             if want > lastBux:
-                if getTixToBuxEstimate(tix) >= want:
+                if GetTixToBuxEstimate(tix) >= want:
                     print("Getting {0} Robux".format(want))
                     SubmitTrade(tix, 'Tickets', want, 'Robux', Fast=True)
                 else:
@@ -235,19 +235,19 @@ def setup():
         while True:
             user = input('Username: ')
             if user:
-                login(user, getpass())
+                Login(user, getpass())
                 break
     elif choice == 2:
-        accounts = listAccounts()
+        accounts = ListAccounts()
         if not accounts:
             raise NoAccountsError()
+        print(Fore.YELLOW + 'Accounts:')
         for acc in accounts:
-            print('Accounts:')
             print(Fore.YELLOW + '*  ' + acc)
         while True:
             account = input('Log in to: ')
             if account in accounts:
-                loadAccounts(account)
+                LoadAccounts(account)
                 break
     deinit()
 
