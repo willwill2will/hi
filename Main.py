@@ -6,19 +6,18 @@ Created on May 18, 2014
 
 The frontend for my trading bot.
 """
-import math
-import time
-import os
 import atexit
+import math
+import os
 import sys
+import time
 
-from lxml import html
 from colorama import init, deinit, Fore, reinit
+from lxml import html
 
-from RbxAPI import getpass, getnum, GetValidation, TCUrl, GetCash, GetSpread, GetRate, Login, ListAccounts, \
-    LoadAccounts, WriteConfig, ReadConfig, IsTradeActive, general, pause, Session, GetBuxToTixEstimate, \
-    GetTixToBuxEstimate
-from RbxAPI.errors import NoAccountsError, Iaz3Error, SetupError, InvalidException
+from RbxAPI import getpass, GetNum, GetValidation, TC_URL, GetCash, GetSpread, GetRate, Login, ListAccounts, \
+    LoadAccounts, IsTradeActive, Pause, session, GetBuxToTixEstimate, GetTixToBuxEstimate
+from RbxAPI.errors import NoAccountsError, SetupError
 
 if getattr(sys, 'frozen', False):
     os.environ["REQUESTS_CA_BUNDLE"] = os.path.abspath(
@@ -48,7 +47,7 @@ def cancel(num):
     :param num: Trade number to delete, starting at zero. Currently not used.
     """
     raise NotImplementedError
-    state, event = GetValidation(TCUrl)
+    state, event = GetValidation(TC_URL)
     # tra = str(c)  # what to cancel. starts at 0, goes +1
     values2 = {
         'ctl00$ctl00$ScriptManager': ('ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$OpenOffers$OpenOffersUpdat'
@@ -69,7 +68,7 @@ def cancel(num):
         '__VIEWSTATE': state, '__EVENTVALIDATION': event
     }
 
-    r = s.get(TCUrl)
+    r = s.get(TC_URL)
     tree = html.fromstring(r.text)
     Tremain = tree.xpath(('//*[@id="ctl00_ctl00_cphRoblox_cphMyRobloxContent_ctl00_OpenBids_OpenBidsU'
                           'pdatePanel"]/table/tr[2]/td[2]/text()'))
@@ -79,8 +78,8 @@ def cancel(num):
         print('Remaining: ' + str(Rremain[0]))
     except Exception as ex:
         print(ex)
-    s.post(TCUrl, data=values2)
-    s.post(TCUrl, data=values3)
+    s.post(TC_URL, data=values2)
+    s.post(TC_URL, data=values3)
 
 
 def SubmitTrade(toTrade, fromCurrency, AmountReceive, toCurrency, Fast=False):
@@ -101,7 +100,7 @@ def SubmitTrade(toTrade, fromCurrency, AmountReceive, toCurrency, Fast=False):
     # If FastTrade, we need to use a Market Order
     if Fast:
         values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$OrderType'] = 'MarketOrderRadioButton'
-    state, event = GetValidation(TCUrl)
+    state, event = GetValidation(TC_URL)
     values['__VIEWSTATE'] = state
     values['__EVENTVALIDATION'] = event
     values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$HaveAmountTextBoxRestyle'] = toTrade
@@ -109,7 +108,7 @@ def SubmitTrade(toTrade, fromCurrency, AmountReceive, toCurrency, Fast=False):
     values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$WantAmountTextBox'] = AmountReceive
     values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$WantCurrencyDropDownList'] = toCurrency
 
-    Session.post(TCUrl, data=values)
+    session.post(TC_URL, data=values)
 
 
 def Calculate():
@@ -120,7 +119,7 @@ def Calculate():
     print("The bot has started. Do not fear if nothing is shown on screen. It is working")
     while True:
         # waitTime = 0
-        while not (IsTradeActive()):
+        while IsTradeActive():
             # waitTime += 1
             # print("Progress {:2.1%}".format(waitTime / 10), end="\r")
             print('Waiting for trade to go through.', end='\r')
@@ -210,7 +209,7 @@ def _mode():
     reinit()
     print(Fore.WHITE + '   1: Default Trading')
     print(Fore.WHITE + '   2: Fast Trading')
-    choice = getnum()
+    choice = GetNum()
     if choice == 1:
         return True
     elif choice == 2:
@@ -227,7 +226,7 @@ def setup():
     init(convert=True)
     print(Fore.WHITE + '   1: Log In?')
     print(Fore.WHITE + '   2: Load Account?')
-    choice = getnum()
+    choice = GetNum()
     if not choice:
         raise SetupError()
     if choice == 1:
@@ -273,7 +272,7 @@ def closing():
     :rtype:
     """
     deinit()
-    pause()
+    Pause()
 
 
 if __name__ == '__main__':
