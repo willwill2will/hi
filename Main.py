@@ -119,12 +119,15 @@ def Calculate():
     lastBux, lastTix = GetCash()
     print("The bot has started. Do not fear if nothing is shown on screen. It is working")
     while True:
-        # waitTime = 0
+        waitTime = 0
         while IsTradeActive():
+            waitTime = 1
             # waitTime += 1
             # print("Progress {:2.1%}".format(waitTime / 10), end="\r")
             print('Waiting for trade to go through.', end='\r')
             time.sleep(10)
+        if waitTime == 1:
+            print("Done Waiting For Trade")
         bux, tix = GetCash()  # Money
         buxRate, tixRate = GetRate()
         # spread = GetSpread()
@@ -133,7 +136,7 @@ def Calculate():
         # TODO: Very advanced caluclations, using new formula. Focus on tix and bux profit, not net.
         if bux:  # Tix to Bux
             tixWant = int(math.floor(bux / tixRate))
-            if tixWant > (lastTix + 20):
+            if tixWant > lastTix:
                 lastTix = tix
                 SubmitTrade(bux, "Tickets", tixWant, 'Robux')
                 print("Trade Submitted")
