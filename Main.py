@@ -133,7 +133,6 @@ def Calculate():
         # spread = GetSpread()
         if (buxRate == 0.0000) or (tixRate == 0.0000) or (abs(buxRate - tixRate) >= 10):
             continue
-        # TODO: Very advanced caluclations, using new formula. Focus on tix and bux profit, not net.
         if bux:  # Tix to Bux
             tixWant = int(math.floor(bux / tixRate))
             if tixWant > lastTix:
@@ -166,6 +165,9 @@ def FastCalculate(lastTix=None, lastBux=None):
     :param lastTix:
     :type lastTix:
     """
+    print("WARNING: THIS IS AN EXPERIMENTAL FEATURE."
+          "\nTESTS SHOW THAT IT CAN MAKE A LOT OF PROFIT QUICKLY, AT TIMES."
+          "\nBUT ALSO IT CAN LOSE VARIOUS AMOUNTS OF TIX. CURRENTLY UNRELIABLE. YOU HAVE BEEN WARNED")
     if lastTix is None and lastBux is None:
         lastTix, lastBux = GetCash()
     else:

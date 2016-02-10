@@ -9,8 +9,6 @@ import msilib
 import requests
 from cx_Freeze import *
 
-from Main import version
-
 import Inno
 
 base = None
@@ -75,7 +73,7 @@ bdist_msi_options = {
 
 app = Executable("Main.py", targetName='TCBot.exe', icon="TCicon.ico", )
 
-ver = version
+ver = '3.0'
 setup(name="Trade Currency Bot", author='Iaz3', author_email='CrazyKilla15@gmail.com', version=ver,
       description="Iaz3's Trade Currency Bot for Roblox",
       options={"build_exe": build_exe_options, 'bdist_msi': bdist_msi_options}, executables=[app])

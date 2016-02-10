@@ -340,7 +340,7 @@ class InnoScript(object):
             lines = []
         for filename in getattr(self.builder, attrname, []):
             if type(filename) == tuple:
-                filename = filename[0]  # FIXME: here
+                filename = filename[0]
             relname = self.chop(filename)
             if relname in ''.join(lines):
                 continue
@@ -398,7 +398,7 @@ class InnoScript(object):
 
             # handle sections
             sections = set()
-            # FIXME: This is never used??
+            # For custom scripts
             for firstline, name, lines in self.parse_iss(inno_script):
                 if firstline:
                     fp.write(firstline.encode() + b'\n')
