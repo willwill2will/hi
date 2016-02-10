@@ -100,7 +100,7 @@ def getregvalue(path, default=None):
     """
     root, subkey = path.split('\\', 1)
     if root.startswith('HKEY_'):
-        root = getattr(_winreg, root)
+        root = getattr(winreg, root)  ##
     elif root in hkshortnames:
         root = hkshortnames[root]
     else:

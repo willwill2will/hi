@@ -182,7 +182,7 @@ def FastCalculate(lastTix=None, lastBux=None):
                 if GetBuxToTixEstimate(bux) < want:
                     bux += 1
                     break
-            GetTix = lastTix + 20  # FIXME: Expand on this, accounting for extra tix made last time.
+            GetTix = lastTix + 20
             if want > GetTix:
                 if GetBuxToTixEstimate(bux) >= want:  # Make sure still getting the same, correct, amount.
                     print("Getting {0} Tickets".format(want))
