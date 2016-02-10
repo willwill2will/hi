@@ -4,13 +4,17 @@ Created on May 20, 2014
 
 @author: Diana
 """
-from cx_Freeze import *
-import requests
 import msilib
+
+import requests
+from cx_Freeze import *
+
+import Inno
 
 base = None
 
 GUID = msilib.gen_uuid()
+
 # FOFF
 # noinspection PyPep8
 shortcut_table = [
