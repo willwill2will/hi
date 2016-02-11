@@ -117,19 +117,6 @@ def getregvalue(path, default=None):
         return default
 
 
-class IssFile:
-    def __init__(self, *args, **kwargs):
-        self.args = args
-        self.kwargs = kwargs
-
-    def __enter__(self):
-        self.fileObj = open(*self.args, **self.kwargs)
-        return self.fileObj
-
-    def __exit__(self, *_):
-        self.fileObj.close()
-
-
 def issline(fileObj, **kwargs):
     noescape = ['Flags', ]
     args = []
@@ -142,12 +129,22 @@ def issline(fileObj, **kwargs):
 
 
 class InnoScript(object):
-    consts_map = dict(AppName='%(name)s', AppVerName='%(name)s %(version)s', AppVersion='%(version)s',
-                      VersionInfoVersion='%(version)s', AppCopyright='%(author)s', AppContact='%(author_email)s',
-                      AppComments='%(description)s', AppPublisher='%(author)s', AppPublisherURL='%(url)s',
+    # FOFF
+    consts_map = dict(AppName='%(name)s',
+                      AppVerName='%(name)s %(version)s',
+                      AppVersion='%(version)s',
+                      VersionInfoVersion='%(version)s',
+                      AppCopyright='Copyright (C) 2015-2016 %(author)s',
+                      AppContact='%(author_email)s',
+                      AppComments='%(description)s',
+                      AppPublisher='%(author)s',
+                      AppPublisherURL='%(url)s',
                       AppSupportURL='%(url)s', )
-    metadata_map = dict(SolidCompression='yes', DefaultGroupName='%(name)s', DefaultDirName='{pf}\\%(name)s',
+    metadata_map = dict(SolidCompression='yes',
+                        DefaultGroupName='%(name)s',
+                        DefaultDirName='{pf}\\%(name)s',
                         OutputBaseFilename='%(name)s-%(version)s-' + str(sysconfig.get_platform()) + '-setup', )
+    # FON
     metadata_map.update(consts_map)
     required_sections = ('Setup', 'Files', 'Run', 'UninstallRun', 'Languages', 'Icons', 'Code',)
     default_flags = ('ignoreversion', 'overwritereadonly', 'uninsremovereadonly',)
@@ -157,7 +154,7 @@ class InnoScript(object):
 
     def __init__(self, builder):
         self.builder = builder
-        self.issfile = os.path.join(self.builder.dist_dir, 'distutils.iss')
+        self.issfile = "distutils.iss"  # os.path.join(self.builder.dist_dir, 'distutils.iss')
 
     def parse_iss(self, s):
         firstline = ''
@@ -243,8 +240,9 @@ class InnoScript(object):
     def handle_iss_setup(self, lines, fp):
         metadata = self.metadata
         iss_metadata = dict((k, v % metadata) for k, v in list(self.metadata_map.items()))
-        iss_metadata['OutputDir'] = "."  # self.builder.dist_dir
+        iss_metadata['OutputDir'] = self.builder.dist_dir
         iss_metadata['AppId'] = self.AppId
+        iss_metadata['AllowNoIcons'] = True
 
         # if self.builder.service_exe_files or self.builder.comserver_files:
         #     iss_metadata['PrivilegesRequired'] = 'admin'
@@ -274,10 +272,10 @@ class InnoScript(object):
             else:
                 fp.write(line + '\n')
 
-        if 'AppId' in iss_metadata:
-            print(('There is no "AppId" in "[Setup]" section.\n'
-                   '"AppId" is automatically generated from metadata (%s),'
-                   'not a random value.' % iss_metadata['AppId']))
+        # if 'AppId' in iss_metadata:
+        #     print(('There is no "AppId" in "[Setup]" section.\n'
+        #            '"AppId" is automatically generated from metadata (%s),'
+        #            'not a random value.' % iss_metadata['AppId']))
 
         for k in sorted(iss_metadata):
             fp.write(('%s=%s\n' % (k, iss_metadata[k],)).encode('utf_8'))
@@ -292,46 +290,39 @@ class InnoScript(object):
         files = []
         excludes = []
 
-        files.extend(self.builder.include_files)
-        files.extend([os.path.join("..", self.builder.build_exe)])
-
-        # handle Tkinter
-        if 'Tkinter' in self.builder.includes:
-            tcl_dst_dir = os.path.join(self.builder.lib_dir, 'tcl')
-            files.append(tcl_dst_dir)
+        for file in self.builder.include_files:
+            if type(file) == tuple:
+                file = file[0]
+            files.append(os.path.abspath(file))
+        files.extend([os.path.abspath(os.path.join(self.builder.build_exe, '*'))])
 
         stored = set()
         for filename in files:
-            if type(filename) == tuple:
-                filename = filename[0]
             if filename in excludes:
                 continue
-            relname = self.chop(filename)
             # user operation given or already wrote
-            if relname in ''.join(lines) or relname in stored:
+            if filename in ''.join(lines) or filename in stored:
                 continue
 
             flags = list(self.default_flags)
             place = ''
 
             if os.path.isfile(filename):
-                if os.path.splitext(relname)[1].lower() in self.bin_exts:
+                if os.path.splitext(filename)[1].lower() in self.bin_exts:
                     flags.append('restartreplace')
                     flags.append('uninsrestartdelete')
 
                 if filename.startswith(self.builder.dist_dir):
-                    place = os.path.dirname(relname)
-
-                extraargs = {}
+                    place = os.path.dirname(filename)
             else:
                 # isdir
                 if filename.startswith(self.builder.dist_dir):
-                    place = relname
-                relname += '\\*'
+                    place = filename
+                    filename += '\\*'
                 flags.extend(self.default_dir_flags)
 
-            issline(fp, Source=relname, DestDir="{app}\\%s" % place, Flags=' '.join(flags), **extraargs)
-            stored.add(relname)
+            issline(fp, Source=filename, DestDir="{app}\\%s" % place, Flags=' '.join(flags))
+            stored.add(filename)
 
         self.handle_iss(lines, fp)
 
@@ -354,8 +345,16 @@ class InnoScript(object):
 
     def handle_iss_icons(self, lines, fp):
         self.handle_iss(lines, fp)
-        for _, filename in self._iter_bin_files('include_files', lines):
-            issline(fp, Name="{group}\\%s" % self.metadata['name'], Filename="{app}\\%s" % filename, )
+        # for _, filename in self._iter_bin_files('include_files', lines):
+        #     issline(fp, Name="{group}\\%s" % self.metadata['name'], Filename="{app}\\%s" % filename, )
+
+        if self.builder.include_files:
+            issline(fp, Name="{group}\\Uninstall %s" % self.metadata['name'], Filename="{uninstallexe}",
+                    IconFilename="{app}\\TCIcon.ico", )
+            issline(fp, Name="{group}\\TCBot", Filename="{app}\\TCBot.exe", IconFilename="{app}\\TCIcon.ico")
+            if self.builder.regist_startup:
+                issline(fp, Name="{commonstartup}\\%s" % self.metadata['name'], Filename="{app}\\%s" % 'TCBot.exe',
+                        IconFilename="{app}\\TCIcon.ico")
 
     def handle_iss_languages(self, lines, fp):
         self.handle_iss(lines, fp)
@@ -380,20 +379,22 @@ class InnoScript(object):
         else:
             inno_script = self.builder.inno_script
 
-        with IssFile(self.issfile, 'wb') as fp:
+        with open(self.issfile, 'wb') as fp:
             fp.write(codecs.BOM_UTF8)
             fp.write(b'; This file is created by distutils InnoSetup extension.\n')
 
             # write "#define CONSTANT value"
             consts = self.iss_consts
+            # FOFF
             consts.update({
-                'PYTHON_VERION': '%d.%d' % sys.version_info[:2], 'PYTHON_VER': '%d%d' % sys.version_info[:2],
+                'PYTHON_VERION': '%d.%d' % sys.version_info[:2],
+                'PYTHON_VER': '%d%d' % sys.version_info[:2],
                 'PYTHON_DIR': sys.prefix, 'PYTHON_DLL': modname(sys.dllhandle),
             })
+            # FON
             consts.update((k.upper(), v) for k, v in list(self.metadata.items()))
             for k in sorted(consts):
                 fp.write(('#define %s "%s"\n' % (k, consts[k],)).encode('utf_8'))
-
             fp.write(b'\n')
 
             # handle sections
@@ -416,19 +417,20 @@ class InnoScript(object):
 
     def compile(self):
         subprocess.call([self.innoexepath, '/cc', self.issfile])
-        outputdir = self.iss_metadata.get('OutputDir', os.path.join(os.path.dirname(self.issfile), 'Output'))
-        setupfile = os.path.join(outputdir, self.iss_metadata.get('OutputBaseFilename', 'setup') + '.exe')
+        # outputdir = self.iss_metadata.get('OutputDir', os.path.join(os.path.dirname(self.issfile), 'Output'))
+        setupfile = os.path.abspath(
+            os.path.join(self.builder.dist_dir, self.iss_metadata.get('OutputBaseFilename', 'setup') + '.exe'))
 
         # zip the setup file
         if self.builder.zip:
             if isinstance(self.builder.zip, str):
                 zipname = self.builder.zip
             else:
-                zipname = setupfile + '.zip'
+                zipname = os.path.abspath(setupfile + '.zip')
 
-            zip = ZipFile(zipname, 'w', ZIP_DEFLATED)
-            zip.write(setupfile, os.path.basename(setupfile))
-            zip.close()
+            zip_ = ZipFile(zipname, 'w', ZIP_DEFLATED)
+            zip_.write(setupfile, os.path.basename(setupfile))
+            zip_.close()
 
             self.builder.distribution.dist_files.append(('innosetup', '', zipname))
         else:
@@ -453,6 +455,7 @@ class innosetup(build_exe):
         self.inno_script = ''
         self.zip = False
         self.dist_dir = 'dist/'
+        self.regist_startup = False
         os.makedirs(self.dist_dir, exist_ok=True)
 
     def finalize_options(self):
@@ -462,7 +465,5 @@ class innosetup(build_exe):
         build_exe.run(self)
 
         script = InnoScript(self)
-        # print "*** creating the inno setup script ***"
         script.create()
-        # print "*** compiling the inno setup script ***"
         script.compile()

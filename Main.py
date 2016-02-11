@@ -15,7 +15,7 @@ import time
 from colorama import init, deinit, Fore, reinit
 from lxml import html
 
-from RbxAPI import GetPass, GetNum, GetValidation, TC_URL, GetCash, GetSpread, GetRate, Login, ListAccounts, \
+from RbxAPI import GetPass, GetNum, GetValidation, TC_URL, GetCash, GetRate, Login, ListAccounts, \
     LoadAccounts, IsTradeActive, Pause, session, GetBuxToTixEstimate, GetTixToBuxEstimate
 from RbxAPI.errors import NoAccountsError, SetupError
 
@@ -23,20 +23,20 @@ if getattr(sys, 'frozen', False):
     os.environ["REQUESTS_CA_BUNDLE"] = os.path.abspath(
         os.path.join(os.path.abspath(sys.argv[0]), os.pardir, "cacert.pem"))
 
-Banner = """Trade Currency Bot made by Iaz3, offically distrubuted on reddit/bitbucket via MEGA. BOT IS PROVIDED AS IS.
-ROBLOX TCBot version {0}, Copyright (C) 2015 Diana
-ROBLOX TCBot comes with ABSOLUTELY NO WARRANTY; for details, refer to the LICENSE file.
-This is free software, and you are welcome to redistribute it under certain conditions; read the LICENSE file for \
-details.
-"""
-
 values = {
     'ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$OrderType': 'LimitOrderRadioButton',
     'ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$AllowSplitTradesCheckBox': 'on',
     '__EVENTTARGET': 'ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$SubmitTradeButton'
 }
 
-version = '2.0.3'
+version = '3.0'
+
+Banner = """Trade Currency Bot made by Iaz3, offically distrubuted on reddit/bitbucket via MEGA. BOT IS PROVIDED AS IS.
+ROBLOX TCBot version {0}, Copyright (C) 2015 Diana
+ROBLOX TCBot comes with ABSOLUTELY NO WARRANTY; for details, refer to the LICENSE file.
+This is free software, and you are welcome to redistribute it under certain conditions; read the LICENSE file for \
+details.
+""".format(version)
 
 
 # noinspection PyUnusedLocal,PyUnreachableCode
