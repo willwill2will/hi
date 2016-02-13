@@ -154,7 +154,7 @@ def Calculate():
                            " {3}\nLastBux: {4}\nLastTix: {5}".format(buxWant, tixCost, buxProfit, tixProfit, lastBux,
                                                                      lastTix))
 
-            if buxWant > lastBux and tixProfit > 0:
+            if buxProfit > 0 and tixProfit > 0 or buxProfit > 0 and abs(tixProfit) <= 5:
                 print("Getting {0} Bux for {1} Tix with "
                       "a potential profit of:\n{2} Robux\n{3} Tickets\n".format(buxWant, tixCost, buxProfit, tixProfit))
                 DebugLog.debug("\n\nGetting {0} Bux for {1} Tix with "
