@@ -115,6 +115,7 @@ def Calculate():
     Where the trade/profit "calculation" happens
     """
     lastBux, lastTix = GetCash()
+    print(lastBux, lastTix)
     print("The bot has started. Do not fear if nothing is shown on screen. It is working")
     while True:
         waitTime = 0
@@ -125,7 +126,7 @@ def Calculate():
             print('Waiting for trade to go through.', end='\r')
             time.sleep(10)
         if waitTime == 1:
-            print("Done Waiting For Trade")
+            print("\nDone Waiting For Trade")
         bux, tix = GetCash()  # Money
         buxRate, tixRate = GetRate()
         DebugLog.debug("\nRobux: {0}\nTickets: {1}\n".format(bux, tix))
@@ -134,29 +135,33 @@ def Calculate():
         if (buxRate == 0.0000) or (tixRate == 0.0000) or (abs(buxRate - tixRate) >= 10):
             DebugLog.info("Bad Rates")
             continue
-        if bux:  # Tix to Bux
+        if bux:  # Bux to Tix
             tixWant = int(math.floor(bux * tixRate))
             if tixWant > lastTix:
-                print("Getting {0} Tix for {1} Bux".format(tixWant, bux))
+                print("Getting {0} Tix for {1} Bux\n".format(tixWant, bux))
+                DebugLog.debug("\n\nGetting {0} Tix for {1} Bux\n\n".format(tixWant, bux))
 
-                lastTix = tix
+                lastBux = bux
                 SubmitTrade(bux, tixWant, "Robux")
-                print("Trade Submitted")
-        elif tix:
+        elif tix:  # Tix to Bux
             buxWant = int(math.floor(tix / buxRate))
             tixCost = int(math.ceil(buxWant * buxRate))
 
             buxProfit = buxWant - lastBux
             tixProfit = lastTix - tixCost
 
-            # print(buxWant, tixCost, buxProfit, tixProfit, lastBux)
+            DebugLog.debug("BuxWant: {0}\nTixCost: {1}\nBuxProfit: {2}\nTixProfit:"
+                           " {3}\nLastBux: {4}\nLastTix: {5}".format(buxWant, tixCost, buxProfit, tixProfit, lastBux,
+                                                                     lastTix))
 
             if buxWant > lastBux and tixProfit > 0:
                 print("Getting {0} Bux for {1} Tix with "
-                      "a potential profit of:\n{2} Robux\n{3} Tickets".format(buxWant, tixCost, buxProfit, tixProfit))
-                lastBux = bux
+                      "a potential profit of:\n{2} Robux\n{3} Tickets\n".format(buxWant, tixCost, buxProfit, tixProfit))
+                DebugLog.debug("\n\nGetting {0} Bux for {1} Tix with "
+                               "a potential profit of:\n{2} Robux\n{3} Tickets\n\n".format(buxWant, tixCost, buxProfit,
+                                                                                           tixProfit))
+                lastTix = tix
                 SubmitTrade(tixCost, buxWant, 'Tickets')
-                print('Trade Submitted')
         time.sleep(2)
 
 
@@ -266,7 +271,7 @@ def main():
     The main function.
     It all starts here
     """
-    if _mode():
+    if True:  # _mode():
         Calculate()
     else:  # Fast Trade
         FastCalculate()

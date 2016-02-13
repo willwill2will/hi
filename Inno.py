@@ -58,10 +58,10 @@ begin
 end;
 """ % {
     'x64': platform.machine() == 'AMD64',
-    }
+}
 
 
-def modname(handle):
+def ModName(handle):
     """
     get module filename from HMODULE
 
@@ -73,25 +73,25 @@ def modname(handle):
     return b.value
 
 
-hkshortnames = {
+HKShortNames = {
     'HKLM': winreg.HKEY_LOCAL_MACHINE, 'HKCU': winreg.HKEY_CURRENT_USER, 'HKCR': winreg.HKEY_CLASSES_ROOT,
     'HKU': winreg.HKEY_USERS, 'HKCC': winreg.HKEY_CURRENT_CONFIG, 'HKDD': winreg.HKEY_DYN_DATA,
     'HKPD': winreg.HKEY_PERFORMANCE_DATA,
 }
 
 
-def getregvalue(path, default=None):
+def GetRegValue(path, default=None):
     """
     Get a registry value
 
     No Name value
 
-    >>> getregvalue('HKEY_CLASSES_ROOT\\.py')
+    >>> GetRegValue('HKEY_CLASSES_ROOT\\.py')
     'Python.File'
 
     Named value
 
-    >>> getregvalue('HKEY_CLASSES_ROOT\\.py\\Content Type')
+    >>> GetRegValue('HKEY_CLASSES_ROOT\\.py\\Content Type')
     ''text/plain
 
     :param path: Reg path
@@ -102,8 +102,8 @@ def getregvalue(path, default=None):
     root, subkey = path.split('\\', 1)
     if root.startswith('HKEY_'):
         root = getattr(winreg, root)  ##
-    elif root in hkshortnames:
-        root = hkshortnames[root]
+    elif root in HKShortNames:
+        root = HKShortNames[root]
     else:
         root = winreg.HKEY_CURRENT_USER
         subkey = path
@@ -229,7 +229,7 @@ class InnoScript(object):
         if self.builder.InnoSetupEXE:
             return self.builder.InnoSetupEXE
 
-        result = getregvalue('HKCR\\InnoSetupScriptFile\\shell\\compile\\command\\')
+        result = GetRegValue('HKCR\\InnoSetupScriptFile\\shell\\compile\\command\\')
         if result:
             if result.startswith('"'):
                 result = result[1:].split('"', 1)[0]
@@ -237,12 +237,12 @@ class InnoScript(object):
                 result = result.split()[0]
             return result
 
-        result = getregvalue('HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion'
+        result = GetRegValue('HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion'
                              '\\Uninstall\\Inno Setup 5_is1\\InstallLocation')
         if result:
             return os.path.join(result, 'Compil32.exe')
 
-        result = getregvalue('HKLM\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows'
+        result = GetRegValue('HKLM\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows'
                              '\\CurrentVersion\\Uninstall\\Inno Setup 5_is1\\InstallLocation')
         if result:
             return os.path.join(result, 'Compil32.exe')
@@ -411,7 +411,7 @@ class InnoScript(object):
             consts.update({
                 'PYTHON_VERION': '%d.%d' % sys.version_info[:2],
                 'PYTHON_VER': '%d%d' % sys.version_info[:2],
-                'PYTHON_DIR': sys.prefix, 'PYTHON_DLL': modname(sys.dllhandle),
+                'PYTHON_DIR': sys.prefix, 'PYTHON_DLL': ModName(sys.dllhandle),
             })
             # FON
             consts.update((k.upper(), v) for k, v in list(self.metadata.items()))
