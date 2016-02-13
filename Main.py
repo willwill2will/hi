@@ -115,7 +115,6 @@ def Calculate():
     Where the trade/profit "calculation" happens
     """
     lastBux, lastTix = GetCash()
-    print(lastBux, lastTix)
     print("The bot has started. Do not fear if nothing is shown on screen/it doesnt change for a long time. It is "
           "working\n")
     while True:
@@ -127,7 +126,7 @@ def Calculate():
             print('Waiting for trade to go through.', end='\r')
             time.sleep(10)
         if waitTime == 1:
-            print("\nDone Waiting For Trade")
+            print("\nDone Waiting For Trade to go through.\n")
         bux, tix = GetCash()  # Money
         buxRate, tixRate = GetRate()
         DebugLog.debug("\nRobux: {0}\nTickets: {1}\n".format(bux, tix))
@@ -161,7 +160,7 @@ def Calculate():
                 DebugLog.debug("\n\nGetting {0} Bux for {1} Tix with "
                                "a potential profit of:\n{2} Robux\n{3} Tickets\n\n".format(buxWant, tixCost, buxProfit,
                                                                                            tixProfit))
-                lastTix = tix
+                lastTix = tix + tixProfit
                 SubmitTrade(tixCost, buxWant, 'Tickets')
         time.sleep(2)
 
