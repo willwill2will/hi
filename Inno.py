@@ -28,7 +28,6 @@ from cx_Freeze.dist import build_exe
 command.__all__.append('innosetup')
 sys.modules['distutils.command.innosetup'] = sys.modules[__name__]
 
-DEFAULT_ISS = ""
 DEFAULT_CODES = """
 procedure ExecIfExists(const FileName, Arg: String);
 var
@@ -57,7 +56,9 @@ begin
             RaiseException('error: unregister ' + FileName);
     end;
 end;
-""" % {'x64': platform.machine() == 'AMD64',}
+""" % {
+    'x64': platform.machine() == 'AMD64',
+    }
 
 
 def modname(handle):
@@ -129,23 +130,28 @@ def issline(fileObj, **kwargs):
 
 
 class InnoScript(object):
+    """
+    Handles and creates an Inno Setup Script
+    """
     # FOFF
-    consts_map = dict(AppName='%(name)s',
-                      AppVerName='%(name)s %(version)s',
-                      AppVersion='%(version)s',
-                      VersionInfoVersion='%(version)s',
-                      AppCopyright='Copyright (C) 2015-2016 %(author)s',
-                      AppContact='%(author_email)s',
-                      AppComments='%(description)s',
-                      AppPublisher='%(author)s',
-                      AppPublisherURL='%(url)s',
-                      AppSupportURL='%(url)s', )
-    metadata_map = dict(SolidCompression='yes',
-                        DefaultGroupName='%(name)s',
-                        DefaultDirName='{pf}\\%(name)s',
-                        OutputBaseFilename='%(name)s-%(version)s-' + str(sysconfig.get_platform()) + '-setup', )
+    setupConstants = dict(AppName='%(name)s',
+                          AppVerName='%(name)s %(version)s',
+                          AppVersion='%(version)s',
+                          VersionInfoVersion='%(version)s',
+                          AppCopyright='Copyright (C) 2015-2016 %(author)s',
+                          AppContact='%(author_email)s',
+                          AppComments='%(description)s',
+                          AppPublisher='%(author)s',
+                          AppPublisherURL='%(url)s',
+                          AppSupportURL='%(url)s',
+                          SetupMutex="Iaz3TCBotSetup"
+                          )
+    setupMetadata = dict(DefaultGroupName='%(name)s',
+                         DefaultDirName='{pf}\\%(name)s',
+                         OutputBaseFilename='%(name)s-%(version)s-' + str(sysconfig.get_platform()) + '-setup', )
+    # Setup file name.
     # FON
-    metadata_map.update(consts_map)
+    setupMetadata.update(setupConstants)
     required_sections = ('Setup', 'Files', 'Run', 'UninstallRun', 'Languages', 'Icons', 'Code',)
     default_flags = ('ignoreversion', 'overwritereadonly', 'uninsremovereadonly',)
     default_dir_flags = ('recursesubdirs', 'createallsubdirs',)
@@ -153,8 +159,11 @@ class InnoScript(object):
     iss_metadata = {}
 
     def __init__(self, builder):
-        self.builder = builder
-        self.issfile = "distutils.iss"  # os.path.join(self.builder.dist_dir, 'distutils.iss')
+        """
+        Sets some defaults
+        """
+        self.builder = builder  # The object that called this.
+        self.issfile = "distutils.iss"  # The file that will be created to hold the setup script. Overwritten.
 
     def parse_iss(self, s):
         firstline = ''
@@ -173,9 +182,16 @@ class InnoScript(object):
             yield firstline, sectionname, lines
 
     def chop(self, filename, dirname=''):
-        """get relative path"""
+        """
+        get relative path
+
+        :param filename:
+        :type filename:
+        :param dirname:
+        :type dirname:
+        """
         if not dirname:
-            dirname = self.builder.dist_dir
+            dirname = self.builder.DistDir
         if not dirname[-1] in "\\/":
             dirname += "\\"
         if filename.startswith(dirname):
@@ -206,12 +222,12 @@ class InnoScript(object):
     @property
     def iss_consts(self):
         metadata = self.metadata
-        return dict((k, v % metadata) for k, v in list(self.consts_map.items()))
+        return dict((k, v % metadata) for k, v in list(self.setupConstants.items()))
 
     @property
     def innoexepath(self):
-        if self.builder.inno_setup_exe:
-            return self.builder.inno_setup_exe
+        if self.builder.InnoSetupEXE:
+            return self.builder.InnoSetupEXE
 
         result = getregvalue('HKCR\\InnoSetupScriptFile\\shell\\compile\\command\\')
         if result:
@@ -239,13 +255,14 @@ class InnoScript(object):
 
     def handle_iss_setup(self, lines, fp):
         metadata = self.metadata
-        iss_metadata = dict((k, v % metadata) for k, v in list(self.metadata_map.items()))
-        iss_metadata['OutputDir'] = self.builder.dist_dir
+        iss_metadata = dict((k, v % metadata) for k, v in list(self.setupMetadata.items()))
+        iss_metadata['OutputDir'] = self.builder.DistDir
         iss_metadata['AppId'] = self.AppId
-        iss_metadata['AllowNoIcons'] = True
+        iss_metadata['AllowNoIcons'] = 'yes'
+        iss_metadata['AlwaysUsePersonalGroup'] = 'yes'
 
-        # if self.builder.service_exe_files or self.builder.comserver_files:
-        #     iss_metadata['PrivilegesRequired'] = 'admin'
+        if False:
+            iss_metadata["SolidCompression"] = 'yes'
 
         # add InfoBeforeFile
         for filename in ('README', 'README.txt', "README.MD"):
@@ -312,16 +329,16 @@ class InnoScript(object):
                     flags.append('restartreplace')
                     flags.append('uninsrestartdelete')
 
-                if filename.startswith(self.builder.dist_dir):
+                if filename.startswith(self.builder.DistDir):
                     place = os.path.dirname(filename)
             else:
                 # isdir
-                if filename.startswith(self.builder.dist_dir):
+                if filename.startswith(self.builder.DistDir):
                     place = filename
                     filename += '\\*'
                 flags.extend(self.default_dir_flags)
 
-            issline(fp, Source=filename, DestDir="{app}\\%s" % place, Flags=' '.join(flags))
+            issline(fp, Source=filename, DestDir="{app}\\{0}".format(place, app="{app}"), Flags=' '.join(flags))
             stored.add(filename)
 
         self.handle_iss(lines, fp)
@@ -358,6 +375,8 @@ class InnoScript(object):
 
     def handle_iss_languages(self, lines, fp):
         self.handle_iss(lines, fp)
+        if True:
+            return
         if lines:
             return
         innopath = os.path.dirname(self.innoexepath)
@@ -373,11 +392,14 @@ class InnoScript(object):
         fp.write(DEFAULT_CODES.encode())
 
     def create(self):
-        inno_script = os.path.join(os.path.dirname(self.builder.dist_dir), self.builder.inno_script)
-        if os.path.isfile(inno_script):
-            inno_script = open(inno_script).read()
+        """
+        Create Inno Installer script, which will be used to make the setup.exe
+        """
+        CustomInnoScript = os.path.join(os.path.dirname(self.builder.DistDir), self.builder.CustomInnoScript)
+        if os.path.isfile(CustomInnoScript):
+            CustomInnoScript = open(CustomInnoScript).read()
         else:
-            inno_script = self.builder.inno_script
+            CustomInnoScript = self.builder.CustomInnoScript
 
         with open(self.issfile, 'wb') as fp:
             fp.write(codecs.BOM_UTF8)
@@ -400,7 +422,7 @@ class InnoScript(object):
             # handle sections
             sections = set()
             # For custom scripts
-            for firstline, name, lines in self.parse_iss(inno_script):
+            for firstline, name, lines in self.parse_iss(CustomInnoScript):
                 if firstline:
                     fp.write(firstline.encode() + b'\n')
                 handler = getattr(self, 'handle_iss_%s' % name.lower(), self.handle_iss)
@@ -419,44 +441,44 @@ class InnoScript(object):
         subprocess.call([self.innoexepath, '/cc', self.issfile])
         # outputdir = self.iss_metadata.get('OutputDir', os.path.join(os.path.dirname(self.issfile), 'Output'))
         setupfile = os.path.abspath(
-            os.path.join(self.builder.dist_dir, self.iss_metadata.get('OutputBaseFilename', 'setup') + '.exe'))
+            os.path.join(self.builder.DistDir, self.iss_metadata.get('OutputBaseFilename', 'setup') + '.exe'))
 
         # zip the setup file
-        if self.builder.zip:
-            if isinstance(self.builder.zip, str):
-                zipname = self.builder.zip
+        if self.builder.ZipSetup:
+            if isinstance(self.builder.ZipSetup, str):
+                zipName = self.builder.ZipSetup
             else:
-                zipname = os.path.abspath(setupfile + '.zip')
+                zipName = os.path.abspath(setupfile + '.zip')
 
-            zip_ = ZipFile(zipname, 'w', ZIP_DEFLATED)
+            zip_ = ZipFile(zipName, 'w', ZIP_DEFLATED)
             zip_.write(setupfile, os.path.basename(setupfile))
             zip_.close()
 
-            self.builder.distribution.dist_files.append(('innosetup', '', zipname))
+            self.builder.distribution.dist_files.append(('innosetup', '', zipName))
         else:
             self.builder.distribution.dist_files.append(('innosetup', '', setupfile))
 
 
 class innosetup(build_exe):
     # setup()'s argument is in self.distribution.
-    user_options = [('inno-setup-exe=', None, 'a path to InnoSetup exe file (Compil32.exe)'),
-                    ('inno-script=', None, 'a path to InnoSetup script file or an InnoSetup script string'),
-                    ('bundle-vcr=', None, 'bundle msvc*XX.dll and mfc*.dll and their manifest files'),
-                    ('zip=', None, 'zip setup file'), ]
-    description = 'create an executable file and an installer by InnoSetup'
+    user_options = [('InnoSetupEXE=', None, 'a path to InnoSetup exe file (Compil32.exe)'),
+                    ('CustomInnoScript=', None, 'a path to an InnoSetup script file or an InnoSetup script string'),
+                    ('ZipSetup=', None, 'Zip setup file'), ]
+    description = 'Create an executable file and an installer using InnoSetup'
 
+    # noinspection PyAttributeOutsideInit
     def initialize_options(self):
         options = dict(self.distribution.command_options.get('build_exe', {}))
         options.update(self.distribution.command_options.get('innosetup', {}))
         self.distribution.command_options['innosetup'] = options
 
         build_exe.initialize_options(self)
-        self.inno_setup_exe = ''
-        self.inno_script = ''
-        self.zip = False
-        self.dist_dir = 'dist/'
+        self.InnoSetupEXE = ''  # Inoo exe, to compile with. If it cant find it automatically.
+        self.CustomInnoScript = ''  # Custom Inno Script, user options and stuff.
+        self.ZipSetup = False
+        self.DistDir = 'dist/'
         self.regist_startup = False
-        os.makedirs(self.dist_dir, exist_ok=True)
+        os.makedirs(self.DistDir, exist_ok=True)
 
     def finalize_options(self):
         build_exe.finalize_options(self)

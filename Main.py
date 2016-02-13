@@ -15,8 +15,8 @@ import time
 from colorama import init, deinit, Fore, reinit
 from lxml import html
 
-from RbxAPI import GetPass, GetNum, GetValidation, TC_URL, GetCash, GetRate, Login, ListAccounts, \
-    LoadAccounts, IsTradeActive, Pause, session, GetBuxToTixEstimate, GetTixToBuxEstimate
+from RbxAPI import GetPass, GetNum, GetValidation, TC_URL, GetCash, GetRate, Login, ListAccounts, LoadAccounts, \
+    IsTradeActive, Pause, Session, GetBuxToTixEstimate, GetTixToBuxEstimate, DebugLog
 from RbxAPI.errors import NoAccountsError, SetupError
 
 if getattr(sys, 'frozen', False):
@@ -83,33 +83,31 @@ def cancel(num):
     s.post(TC_URL, data=values3)
 
 
-def SubmitTrade(toTrade, fromCurrency, AmountReceive, toCurrency, Fast=False):
+def SubmitTrade(AmountToTrade, ReceiveAmount, CurrencyToTrade):
     """
-    Submit a trade to ROBLOX.
+    Submit a Trade on ROBLOX
 
-    :param toTrade: Money going in, IE to trade
-    :type toTrade: int
-    :param fromCurrency: Currency you are converting FROM, IE "Robux" or "Tickets"
-    :type fromCurrency: str
-    :param AmountReceive: What you expect to get in return.
-    :type AmountReceive: int
-    :param toCurrency: Currency you are convering TO, IE "Tickets" or "Robux"
-    :type toCurrency: str
-    :param Fast: Whether using FastTrade
-    :type Fast: bool
+    :param AmountToTrade: Amount of Tickets or Robux to trade
+    :type AmountToTrade: int
+    :param ReceiveAmount: Amount of Tickets or Robux you want to receive.
+    :type ReceiveAmount: int
+    :param CurrencyToTrade: What currency the AmountToTrade is.
+    :type CurrencyToTrade: str
     """
-    # If FastTrade, we need to use a Market Order
-    if Fast:
-        values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$OrderType'] = 'MarketOrderRadioButton'
+    # if Fast:
+    #     values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$OrderType'] = 'MarketOrderRadioButton'
     state, event = GetValidation(TC_URL)
     values['__VIEWSTATE'] = state
     values['__EVENTVALIDATION'] = event
-    values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$HaveAmountTextBoxRestyle'] = toTrade
-    values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$HaveCurrencyDropDownList'] = fromCurrency
-    values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$WantAmountTextBox'] = AmountReceive
-    values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$WantCurrencyDropDownList'] = toCurrency
-
-    session.post(TC_URL, data=values)
+    values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$HaveAmountTextBoxRestyle'] = AmountToTrade
+    values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$WantAmountTextBox'] = ReceiveAmount
+    if CurrencyToTrade == "Robux":
+        values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$HaveCurrencyDropDownList'] = "Robux"
+        values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$WantCurrencyDropDownList'] = "Tickets"
+    else:
+        values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$HaveCurrencyDropDownList'] = "Tickets"
+        values['ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$WantCurrencyDropDownList'] = "Robux"
+    Session.post(TC_URL, data=values)
 
 
 def Calculate():
@@ -130,14 +128,19 @@ def Calculate():
             print("Done Waiting For Trade")
         bux, tix = GetCash()  # Money
         buxRate, tixRate = GetRate()
+        DebugLog.debug("\nRobux: {0}\nTickets: {1}\n".format(bux, tix))
+        DebugLog.debug("Robux Rate: {0}\nTickets Rate: {1}\n".format(buxRate, tixRate))
         # spread = GetSpread()
         if (buxRate == 0.0000) or (tixRate == 0.0000) or (abs(buxRate - tixRate) >= 10):
+            DebugLog.info("Bad Rates")
             continue
         if bux:  # Tix to Bux
-            tixWant = int(math.floor(bux / tixRate))
+            tixWant = int(math.floor(bux * tixRate))
             if tixWant > lastTix:
+                print("Getting {0} Tix for {1} Bux".format(tixWant, bux))
+
                 lastTix = tix
-                SubmitTrade(bux, "Tickets", tixWant, 'Robux')
+                SubmitTrade(bux, tixWant, "Robux")
                 print("Trade Submitted")
         elif tix:
             buxWant = int(math.floor(tix / buxRate))
@@ -146,14 +149,15 @@ def Calculate():
             buxProfit = buxWant - lastBux
             tixProfit = lastTix - tixCost
 
-            print("Getting {0} Bux for {1} Tix with "
-                  "a potential profit of:\n{2} Robux\n{3} Tickets".format(buxWant, tixCost, buxProfit, tixProfit))
+            # print(buxWant, tixCost, buxProfit, tixProfit, lastBux)
 
-            if buxProfit > lastBux and tixProfit > 0:
+            if buxWant > lastBux and tixProfit > 0:
+                print("Getting {0} Bux for {1} Tix with "
+                      "a potential profit of:\n{2} Robux\n{3} Tickets".format(buxWant, tixCost, buxProfit, tixProfit))
                 lastBux = bux
-                SubmitTrade(tixCost, 'Tickets', buxWant, 'Robux')
+                SubmitTrade(tixCost, buxWant, 'Tickets')
                 print('Trade Submitted')
-        time.sleep(5)
+        time.sleep(2)
 
 
 def FastCalculate(lastTix=None, lastBux=None):

@@ -74,8 +74,15 @@ bdist_msi_options = {
 app = Executable("Main.py", targetName='TCBot.exe', icon="TCicon.ico", )
 
 ver = '3.0'
-setup(name="Trade Currency Bot", author='Diana', author_email='CrazyKilla15@gmail.com', version=ver,
+# FOFF
+setup(name="Trade Currency Bot", author='Diana',
+      author_email='CrazyKilla15@gmail.com',
+      version=ver,
       description="Iaz3's Trade Currency Bot for Roblox",
-      options={"build_exe": build_exe_options, 'bdist_msi': bdist_msi_options}, executables=[app])
-
+      options={
+          "build_exe": build_exe_options,
+          'bdist_msi': bdist_msi_options
+               },
+      executables=[app])
+# FON
 # print('Setup Completed: ' + time.strftime("%m/%d/%Y %I:%M:%S %p", time.localtime()))
