@@ -116,7 +116,8 @@ def Calculate():
     """
     lastBux, lastTix = GetCash()
     print(lastBux, lastTix)
-    print("The bot has started. Do not fear if nothing is shown on screen. It is working")
+    print("The bot has started. Do not fear if nothing is shown on screen/it doesnt change for a long time. It is "
+          "working\n")
     while True:
         waitTime = 0
         while IsTradeActive():
