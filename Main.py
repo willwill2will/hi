@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-Created on May 18, 2014
-
-@author: Diana
+Project: TCBot
+File: Main.py
+Author: Diana
+Creation Date: 05/18/2014
+Creation Time: 7:46 PM
 
 The frontend for my trading bot.
+
+Copyright (C) 2016  Diana Land
+Read LICENSE for more information
 """
 import atexit
 import math

@@ -6,6 +6,9 @@ File: Inoo
 Author: Diana
 Creation Date: 2/8/2016
 Creation Time: 7:46 PM
+
+Copyright (C) 2016  Diana Land
+Read LICENSE for more information
 """
 
 __author__ = 'Diana'
