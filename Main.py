@@ -148,7 +148,7 @@ def Calculate():
             tixCost = int(math.ceil(buxWant * buxRate))
 
             buxProfit = buxWant - lastBux
-            tixProfit = lastTix - tixCost
+            tixProfit = tix - tixCost
 
             DebugLog.debug("BuxWant: {0}\nTixCost: {1}\nBuxProfit: {2}\nTixProfit:"
                            " {3}\nLastBux: {4}\nLastTix: {5}".format(buxWant, tixCost, buxProfit, tixProfit, lastBux,
@@ -176,7 +176,7 @@ def FastCalculate(lastTix=None, lastBux=None):
     """
     print("WARNING: THIS IS AN EXPERIMENTAL FEATURE."
           "\nTESTS SHOW THAT IT CAN MAKE A LOT OF PROFIT QUICKLY, AT TIMES."
-          "\nBUT ALSO IT CAN LOSE VARIOUS AMOUNTS OF TIX. CURRENTLY UNRELIABLE. YOU HAVE BEEN WARNED")
+          "\nBUT ALSO IT CAN LOSE MONEY. CURRENTLY UNRELIABLE. YOU HAVE BEEN WARNED")
     if lastTix is None and lastBux is None:
         lastTix, lastBux = GetCash()
     else:

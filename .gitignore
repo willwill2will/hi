@@ -4,6 +4,7 @@ distutils.iss
 gui.py
 TCInfo.txt
 TCInfo.txt.bak
+test.py
 
 
 ## Directory-based project format:
