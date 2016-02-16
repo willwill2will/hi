@@ -51,8 +51,8 @@
 * Diana.
 
 > Iaz3 on ROBLOX.
-> Email: crazykilla15@gmail.com
-> Twitter: @Hugs4Diana
+> * Email: crazykilla15@gmail.com
+> * Twitter: @Hugs4Diana
 
 * Other community or team contact
 
