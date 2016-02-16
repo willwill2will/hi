@@ -31,7 +31,7 @@
 > NOTE: You only need the below Dependencies if you are NOT using the EXE
 * Configuration: config.ini
 > Located at %appdata%\Iaz3Programs\TCBot on windows.
-* Dependencies: **Python 3.x**, LXML, Requests, Beautifulsoup 4, and colorama.
+* Dependencies: **Python 3.x**, LXML, Requests, cx_freeze, Beautifulsoup 4, and colorama.
 * Build Dependencies: Cx_Freeze is needed **in addition to** the above to build.
 * How to run tests: No Tests
 
