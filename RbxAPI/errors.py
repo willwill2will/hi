@@ -1,143 +1,134 @@
 # -*- coding: utf-8 -*-
 """
-Project: ROBLOX
+Project: RbxAPI
 File: errors.py
 Author: Diana
 Creation Date: 8/8/2014
 
 Module containing all errors/exceptions used by the program.
 
-Copyright (C) 2015  Diana Land
+Copyright (C) 2016  Diana Land
 Read LICENSE for more information
 """
-
+import os
 import sys
+import traceback
+
+from RbxAPI import DebugLog
 
 
-def excHandler(exception_type, exception, traceback, debug_hook=sys.excepthook):
+def TracebackHandler(Traceback):
     """
-    Handle proper exceptions being displayed.
+    Handles traceback formatting
 
-    :param exception_type:
-    :type exception_type:
-    :param exception:
-    :type exception:
-    :param traceback:
-    :type traceback:
-    :param debug_hook:
-    :type debug_hook:
+    :param Traceback:
+    :type Traceback:
     :return:
     :rtype:
     """
-    if False:  # TODO: Add a debug flag?
-        debug_hook(exception_type, exception, traceback)
+    DebugInfo = traceback.extract_tb(Traceback)
+    for exc in DebugInfo:
+        RealFileName = os.path.basename(os.path.normpath(exc.filename))
+        exc.filename = RealFileName
+    return ''.join(traceback.format_list(DebugInfo))
+
+
+def ExcHandler(exception_type, exception, errorTraceback, debug_hook=sys.excepthook):
+    """
+    Handle proper exceptions being displayed.
+
+    :param exception_type: Type
+    :type exception_type: Exception
+    :param exception: Exception
+    :type exception:
+    :param errorTraceback: The traceback of the exception.
+    :type errorTraceback: traceback
+    :param debug_hook: Backup, is the orginial function
+    :type debug_hook: sys.excepthook
+    """
+    if False:
+        debug_hook(exception_type, exception, errorTraceback)
     else:
-        print("{0}: {1}".format(exception_type.__name__, exception))
+        Text = "Error: {0} {1}\nTraceback(Send this to Iaz3):\n{2}".format(exception_type.__name__, exception,
+                                                                           TracebackHandler(errorTraceback))
+        DebugLog.debug("\n\n{0}\n\n".format(Text))
+        print(Text)
 
 
-sys.excepthook = excHandler
+sys.excepthook = ExcHandler
 
 
-class Iaz3Error(Exception):
+class RbxAPIError(Exception):
     """
-    Base class for exceptions in this module.
+    Base class for all exceptions in RbxAPI
     """
-    pass
-
-
-class ConnectError(Iaz3Error):
-    """
-    Connection Error.
-    """
-
-    def __init__(self, message=None):
-        """
-        :param message: Message to display.
-        :type message: str | None
-        """
-        self.message = message or 'Error 1000: Failed to connect to ROBLOX.com'
-        self.errno = 1000
 
     def __str__(self):
-        return self.message
+        try:
+            return "Error: {0}".format(self.__dict__['message'])
+        except KeyError:
+            return ""
 
     def __repr__(self):
-        return "<{0}> {1}".format(self.__class__.__name__, self.__dict__ or '')
+        return "<{0}, Error Code: {2}> {1}".format(self.__class__.__name__, self.__dict__ or '')
 
 
-class InvalidException(Iaz3Error):
+class NoUsernameError(RbxAPIError):
     """
-    Throws when the exception is invalid.
-    """
-
-    def __init__(self, msg=None):
-        self.msg = msg or 'This exception is the result of an unexpected error. Please contact Iaz3.'
-        self.errcode = 5
-
-    def __str__(self):
-        return self.msg
-
-    def __repr__(self):
-        return "<{0}> {1}".format(self.__class__.__name__, self.__dict__ or '')
-
-
-class LoginError(Iaz3Error):
-    """
-    Error logging in.
-
-    :param message: Messagr to display
-    :param errno: the error number
-    :raise InvalidException: Raises if this exception was not intended, but a program bug.
+    Username was not entered.
     """
 
-    def __init__(self, message=None, errno=None):
-        self.errno = errno or 2000
-        self.message = message or 'Error 2000: Failed to login, cannot continue.'
-        self.msg = 'Error {0}: {1}'.format(self.errno, self.message)
-
-    def __str__(self):
-        return self.msg
-
-    def __repr__(self):
-        return "<{0}> {1}".format(self.__class__.__name__, self.__dict__ or '')
+    def __init__(self):
+        self.message = "No Username. Cannot Login."
 
 
-class SetupError(Iaz3Error):
+class StorageError(RbxAPIError):
+    """
+    An error with the stored account data, possibly corrupt.
+    """
+
+    def __init__(self):
+        self.message = "Stored data invalid. Please login again."
+
+
+class AccountsError(RbxAPIError):
+    """
+    Expired cookie
+    """
+
+    def __init__(self):
+        self.message = "Invalid/Outdated Username/Password. Account failed to load."
+
+
+class NoAccountsError(RbxAPIError):
+    """
+    No accounts were saved.
+    """
+
+    def __init(self):
+        self.message = "No accounts have been saved, cannot continue."
+
+
+class SetupError(RbxAPIError):
     """
     An error during setup.
     """
 
     def __init__(self):
-        pass
-
-    def __str__(self):
-        return "There was an error during Setup"
-
-    def __repr__(self):
-        return "<{0}> {1}".format(self.__class__.__name__, self.__dict__ or '')
+        self.message = "Error During Setup"
 
 
-class UnsupportedError(Iaz3Error):
+class UnsupportedError(RbxAPIError):
     """
-    Unsuported operatign system.
+    Unsuported operating system.
     """
 
     def __init__(self):
-        pass
-
-    def __str__(self):
-        return 'This operating system is unsuporrted, Sorry!'
-
-    def __repr__(self):
-        return "<{0}> {1}".format(self.__class__.__name__, self.__dict__ or '')
+        self.message = "This operating system is unsuporrted, Sorry!"
 
 
 class GetPassWarning(UserWarning):
     """
     Base class for exceptions.
     """
-    pass
-
-
-if __name__ == '__main__':
     pass

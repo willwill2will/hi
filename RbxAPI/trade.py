@@ -1,66 +1,66 @@
 # -*- coding: utf-8 -*-
 """
-Project: ROBLOX
-File: party.py
+Project: RbxAPI
+File: trade.py
 Author: Diana
 Creation Date: 8/2/2014
 
 Where the magic happens in my TC bot
 
-Copyright (C) 2015  Diana Land
+Copyright (C) 2016  Diana Land
 Read LICENSE for more information
 """
 
-import json
 import re
+from json import JSONDecodeError
+from urllib.error import URLError
 
 from lxml import html
 from suds.client import Client
 
-from RbxAPI import CurrencyURL, TCUrl, Session, EstimateURL
+from RbxAPI import CURRENCY_URL, TC_URL, Session, ESTIMATE_URL, DebugLog
 
 
-def getCash():
+def GetCash():
     """
-    Check how much cash the user has using ROBLOX's API
+    Check how much cash the user has using ROBLOX's API.
+    Requires logged in.
 
-    :return int: 2 variables, containing how much cash the user has.
+    :return int: Robux, tickets.
     :rtype: int, int
     """
-    r = Session.get(CurrencyURL)
-    val = json.loads(r.text)
+    while True:
+        r = Session.get(CURRENCY_URL)
+        try:
+            val = r.json()
+        except JSONDecodeError:
+            DebugLog.debug(r.text)
+            continue
+        break
     return int(val['robux']), int(val['tickets'])
 
 
-def getRate():
+def GetRate():
     """
     Gets the current exchange rates from roblox.
 
-    Will need updating if ROBLOX changes layout
-
-    :return: Rates
+    :return: Rates: Bux, tix.
     :rtype: float, float
     """
-    r = Session.get(TCUrl)
-    tree = html.fromstring(r.text)
+    tree = html.fromstring(Session.get(TC_URL).text)
     rate = tree.xpath('//*[@id="CurrencyQuotePane"]/div[1]/div[2]/div[2]/text()')  # Rates
-    print('Rate is: ' + str(rate))
     m = re.split('/', rate[0])
-    print(m)
     return float(m[0]), float(m[1])
 
 
-def checkTrades():
+def IsTradeActive():
     """
     Check for active trades.
-    If there IS a active Trade, return False.
-    Otherwise True
 
-    :return bool: True if no trades, False if trades active.
+    :return bool: True if trade is active. False otherwise.
     :rtype: bool
     """
-    r = Session.get(TCUrl)
-    tree = html.fromstring(r.text)
+    tree = html.fromstring(Session.get(TC_URL).text)
     tixT = tree.xpath(('//*[@id="ctl00_ctl00_cphRoblox_cphMyRobloxContent_ctl00_OpenBids_Ope'
                        'nBidsUpdatePanel"]/div[1][@class="NoResults"]/text()'))
     buxT = tree.xpath(('//*[@id="ctl00_ctl00_cphRoblox_cphMyRobloxContent_ctl00_OpenOffers_OpenOffersUpdatePanel"]'
@@ -68,22 +68,19 @@ def checkTrades():
     # Default values are ['You do not have any open ____ trades.']
     # So [] means there IS a trade
     if tixT == [] or buxT == []:
-        return False
-    return True
+        return True
+    return False
 
 
 # noinspection PyUnreachableCode
-def checkRates(t):
+def CheckRates():
     """
     Checks the current trade rates, in future to modify trades.
     Unused.
-
-    :param t: I forget i'm sorry figure out my code.
-    :return: no fucking idea.
     """
     raise NotImplementedError
     if t:
-        r = Session.get(TCUrl)
+        r = Session.get(TC_URL)
         tree = html.fromstring(r.text)
         test = tree.xpath('//*[@id="CurrencyBidsPane"]/div/div[1]/text()')
         print(test)
@@ -93,28 +90,26 @@ def checkRates(t):
         print(x)
         return x
     else:
-        r = Session.get(TCUrl)
+        r = Session.get(TC_URL)
         tree = html.fromstring(r.text)
         test = tree.xpath('//*[@id="CurrencyOffersPane"]/div/div[1]/span[@class="notranslate"]/text()')
         print(test[0])
         # return x
 
 
-def getSpread():
+def GetSpread():
     """
     Get the current spread.
 
     :return: The spread.
     :rtype: int
     """
-    r = Session.get(TCUrl)
-    tree = html.fromstring(r.text)
+    tree = html.fromstring(Session.get(TC_URL).text)
     spread = tree.xpath("//*[@id='CurrencyQuotePane']/div[1]/div[1]/div[4]/text()")
-    print('Spread is: ' + str(spread))
     return int(spread[0])
 
 
-def getTixEstimate(ticketsToTrade):
+def GetTixToBuxEstimate(ticketsToTrade):
     """
     Get the current market estimate for a given value of Tickets to Robux
 
@@ -123,17 +118,24 @@ def getTixEstimate(ticketsToTrade):
     :return: The estimated Robux to be received.
     :rtype: int
     """
-    client = Client(EstimateURL)
-    return int(client.service.GetEstimatedTradeReturnForTickets(ticketsToTrade))
+    client = Client(ESTIMATE_URL)
+    try:
+        return int(client.service.GetEstimatedTradeReturnForTickets(ticketsToTrade))
+    except URLError:
+        GetTixToBuxEstimate(ticketsToTrade)
 
-def getBuxEstimate(robuxToTrade):
+
+def GetBuxToTixEstimate(robuxToTrade):
     """
-    Get the current market estimate for a given value of Tickets to Robux
+    Get the current market estimate for a given value of Robux to Tickets
 
     :param robuxToTrade: Amount of Robux.
     :type robuxToTrade: int
     :return: The estimated Tickets to be received.
     :rtype: int
     """
-    client = Client(EstimateURL)
-    return int(client.service.GetEstimatedTradeReturnForRobux(robuxToTrade))
+    client = Client(ESTIMATE_URL)
+    try:
+        return int(client.service.GetEstimatedTradeReturnForRobux(robuxToTrade))
+    except URLError:
+        GetBuxToTixEstimate(robuxToTrade)

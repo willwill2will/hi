@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Project: ROBLOX
+Project: RbxAPI
 File: general.py
 Author: Diana
 Creation Date: 8/2/2014
@@ -8,44 +8,21 @@ Creation Date: 8/2/2014
 General use module.
 Functions that are commonly used among programs are here.
 
-Copyright (C) 2015  Diana Land
+Copyright (C) 2016  Diana Land
 Read LICENSE for more information
 """
 import configparser
+import json
 import os
 import pickle
-import json
 import re
 
 from bs4 import BeautifulSoup
-import requests
 
-from RbxAPI import errors, Session, CheckURL, LoginURL
-
-# User, Authentication.
-LoggedIn = False  # This is ONLY True Or False.
-LoggedInUser = None  # This will be a string, containing the username of the user.
-# TODO: User Class?
+from RbxAPI import errors, Session, CHECK_URL, LOGIN_URL, User
 
 
-def _SetLoggedIn(value, user=None):
-    """
-    Internal Function. Dont use.
-    Sets whether the User is Logged In or Not.
-
-    :param user: User.
-    :type user: str
-    :param value: Whether the user is logged in or not
-    :type value: bool
-    """
-    global LoggedIn
-    global LoggedInUser
-    LoggedIn = value
-    if value:
-        LoggedInUser = user
-
-
-def _rbxToken(element):
+def _RbxToken(element):
     """
     Parses HTML for ROBLOX XsrfToken.
 
@@ -56,10 +33,9 @@ def _rbxToken(element):
     :return: True/False depending on weather element matched.
     :rtype: bool
     """
-    if element.name.lower() == "script":
-        # FIXME: Make sure the ignore whitespace at beggining works.
-        if re.match(r"^\s*Roblox\.XsrfToken\.setToken.*", element.text, re.IGNORECASE):
-            return True
+    if element.name.lower() == "script" and re.match(r"^\s*Roblox\.XsrfToken\.setToken.*", element.text, re.IGNORECASE):
+        # PATCH: Added ignore whitespace at begining.
+        return True
     return False
 
 
@@ -70,15 +46,14 @@ def GetToken():
     :return: The Token
     :rtype: str
     """
-    Token = BeautifulSoup(Session.get('http://www.roblox.com/user.aspx').text, "lxml")
-    Token = Token.find_all(_rbxToken)
-    Token = re.findall(r"\((.*)\)", Token[0].text)[0]  # FIXME: Will error if Token is broken. It shouldent break,
-    # though.
-    Token = re.sub("'", '', Token)
-    return Token
+    token = BeautifulSoup(Session.get('http://www.roblox.com/user.aspx').text, "lxml")
+    token = token.find_all(_RbxToken)
+    token = re.findall(r"\((.*)\)", token[0].text)[0]
+    token = re.sub("'", '', token)
+    return token
 
 
-def getValidation(url):
+def GetValidation(url):
     """
     gets validation from webpage for submitting requests
 
@@ -87,19 +62,13 @@ def getValidation(url):
     :param url: Url to look at.
     :return: Validation. Returns 2 items.
     """
-    r = Session.get(url)
-    b = BeautifulSoup(r.text, "lxml")
-    viewstate = b.findAll("input", {"type": "hidden", "name": "__VIEWSTATE"})
-    eventvalidation = b.findAll('input', {'type': 'hidden', 'name': '__EVENTVALIDATION'})
-    try:
-        return viewstate[0]['value'], eventvalidation[0]['value']
-    except Exception:
-        raise
-        print(viewstate, eventvalidation)
-        raise errors.InvalidException
+    b = BeautifulSoup(Session.get(url).text, "lxml")
+    viewState = b.findAll("input", {"type": "hidden", "name": "__VIEWSTATE"})
+    eventValidation = b.findAll('input', {'type': 'hidden', 'name': '__EVENTVALIDATION'})
+    return viewState[0]['value'], eventValidation[0]['value']
 
 
-def listAccounts():
+def ListAccounts():
     """
     List the accounts currently saved to disk
 
@@ -107,62 +76,66 @@ def listAccounts():
     :rtype: list
     """
     accounts = []
-    for file in os.scandir(returnPath()):
+    for file in os.scandir(ReturnConfigPath()):
         if file.is_file() and file.name.endswith('.acc'):
             accounts.append(file.name.split('.')[0])
     return accounts
 
 
-def loadAccounts(user):
+def LoadAccounts(username):
     """
     Load the specififed account
 
-    :param user: The account to load
-    :type user: str
+    :param username: The account to load
+    :type username: str
     :return: True if success
     :rtype: bool
     """
-    user = str(user)
-    with open(returnPath(user + '.acc'), 'rb') as f:
-        cookies = pickle.load(f)
-        Session.cookies = cookies
-        r = Session.get(CheckURL)
-        if r.url != CheckURL:
-            print("Cookies Failed To Load. Please Login Again.")
-            raise errors.LoginError("Invalid cookie")
-        print('Cookies Loaded Successfully')
-        _SetLoggedIn(True, user)
+    username = str(username)
+    with open(ReturnConfigPath(username + '.acc'), 'rb') as file:
+        try:
+            # cookies = pickle.load(file)
+            data = pickle.load(file)
+        except EOFError:
+            raise errors.StorageError()
+        # Session.cookies = cookies
+        Session.post(LOGIN_URL, data=data)  # For auto login
+        if Session.get(CHECK_URL).url != CHECK_URL:
+            raise errors.AccountsError()
+        User._SetLoggedIn(username)
         return True
 
 
-def login(user, pwd):
+def Login(username, pwd):
     """
     Login into the account
 
     :param pwd: Password used to login
     :type pwd: str
-    :param user: Username used to log in
-    :type user: str
+    :param username: Username used to log in
+    :type username: str
     """
-    user = str(user)
-    if not user:
-        raise errors.LoginError("Empty Username", 9000)
-    with open(returnPath(user + '.acc'), 'wb') as f:
-        data = {'username': user, 'password': pwd}
-        Session.post(LoginURL, data=data)  # login
-        Session.get(CheckURL)
+    username = str(username)
+    if not username:
+        raise errors.NoUsernameError()
+    with open(ReturnConfigPath(username + '.acc'), 'wb') as f:
+        data = {'username': username, 'password': pwd}
+        Session.post(LOGIN_URL, data=data)  # login
+        Session.get(CHECK_URL)
         if '.ROBLOSECURITY' in Session.cookies:
-            pickle.dump(Session.cookies, f)
+            # pickle.dump(Session.cookies, f)
+            pickle.dump(data, f)  # Save the username and password now. This way we can automatically login and
+            # support running the bot 24/7 nonstop. Currently the cookie can expire and crash it.
             print('Save Successful')
-            _SetLoggedIn(True, user)
+            User._SetLoggedIn(username)
             return True
         else:
             f.close()
             os.remove(f.name)
-            raise errors.LoginError("Invalid cookie")
+            raise errors.AccountsError()
 
 
-def convert(obj):
+def Convert(obj):
     """
     Convert javascript things to Python types
     Probably a better way to do it....
@@ -170,37 +143,14 @@ def convert(obj):
     :param obj: Objected to be converted to use Python types
     :return Converted object
     """
+    # Warning, this will fail if theres a problem with the internet and the page doesnt load correctly. Obj will be bad.
     try:
-        # Warning, this will fail if theres a problem with the internet and the page doesnt load correctly.
-        # Obj will be bad.
-        # FIXME: Implement Checks for this?
-        return json.loads(obj)  # Should work.
-    except SyntaxError:
-        raise
+        return json.loads(obj)
+    except json.JSONDecodeError:
+        return {}
 
 
-# noinspection PyUnreachableCode
-def checkInternet():
-    """
-    Attempts to check if successfully connected to the internet.
-
-    This is bad and unpythonic and gross.
-
-    :return True or False
-    """
-    # TODO: Replace with a universal wrapper for requests, with exception handling.
-    # That way all connections go through here, and we can catch internet errors. Instead of trying to check before hand
-    # it's better and more pythonic.
-    raise NotImplementedError
-    try:
-        requests.get('http://www.roblox.com')
-        return True
-    except Exception as e:
-        print(e)
-        return False
-
-
-def returnPath(file=None):
+def ReturnConfigPath(file=None):
     """
     Returns the path used for Data Storage.
 
@@ -219,39 +169,40 @@ def returnPath(file=None):
         return path
 
 
-def writeConfig(data):
+def WriteConfig(data):
     """
     Write config file.
 
     :param data: Data
     :type data: dict
     """
-    if not LoggedInUser and LoggedIn:
-        raise errors.InvalidException
     config = configparser.ConfigParser()
-    config[LoggedInUser] = data
-    with open(returnPath('config.ini'), 'w') as configfile:
+    config[User.loggedInUser] = data
+    with open(ReturnConfigPath('config.ini'), 'w') as configfile:
         config.write(configfile)
         configfile.close()
 
 
-def readConfig(user, key):
+def ReadConfig(username, key):
     """
     Read from config file.
 
-    :param user: User's Data to access
-    :type user: str
+    :param username: User's Data to access
+    :type username: str
     :param key: Key/Value to retrieve
     :type key: str
     :return: Value requested, so far only int values.
     :rtype: int
     """
-    if not LoggedIn:
-        raise errors.InvalidException("Not Logged In.")
+    # TODO: Adapt to user class
     config = configparser.ConfigParser()
-    config.read(returnPath('config.ini'))
-    if user in config:  # Previously saved config.
-        userData = config[user]
+    config.read(ReturnConfigPath('config.ini'))
+    if username in config:  # Previously saved config.
+        userData = config[username]
         return userData.get(key, 0)
     else:  # No existing config file, currently logged in.
         return 0
+
+
+if __name__ == '__main__':
+    pass

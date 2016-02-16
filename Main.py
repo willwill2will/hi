@@ -281,7 +281,6 @@ def main():
     else:  # Fast Trade
         FastCalculate()
         # TODO: Log of trades and profits.
-        # FIXME: Somewhere around here it can error,
 
 
 @atexit.register

@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Project: ROBLOX
+Project: RbxAPI
 File: inputPass.py
 Author: Diana
 Creation Date: 8/18/2014
 
 Custom implmentation of GetPass module to show asterks when you type your password instead of nothing.
 
-It DOES NOT WORK on linux. I can't understand the linux code magic so i didnt try.
-
-Copyright (C) 2015  Diana Land
+Copyright (C) 2016  Diana Land
 Read LICENSE for more information
 """
 import sys
@@ -17,10 +15,10 @@ import warnings
 
 from RbxAPI import errors
 
-__all__ = ["getpass", "getnum", "win_pause"]
+__all__ = ["GetPass", "GetNum", "WinPause"]
 
 
-def win_getpass(prompt='Password: ', stream=None):
+def WinGetPass(prompt='Password: ', stream=None):
     """
     Prompt for password with echo off, using Windows getch().
 
@@ -28,7 +26,7 @@ def win_getpass(prompt='Password: ', stream=None):
     :param prompt: What to display/prompt to the user.
     """
     if sys.stdin is not sys.__stdin__:
-        return fallback_getpass(prompt, stream)
+        return FallbackGetPass(prompt, stream)
     import msvcrt
     for c in prompt:
         msvcrt.putwch(c)
@@ -54,13 +52,12 @@ def win_getpass(prompt='Password: ', stream=None):
     return pw
 
 
-def win_getNum(prompt='> ', choices=2, stream=None):
+def WinGetNum(prompt='> ', choices=2):
     """
     Select number choices using prompt, up to a max of choices.
 
     This isnt working correctly with large numbers but it's fine trust me. Just fix it later
 
-    :param stream: No idea.
     :param choices: How many choices
     :type choices: int
     :param prompt: What to prompt user with
@@ -76,8 +73,7 @@ def win_getNum(prompt='> ', choices=2, stream=None):
             if num:
                 break
         if c == '\003':
-            break
-            # raise KeyboardInterrupt
+            raise KeyboardInterrupt
         if c == '\b':
             if len(num) > 0:
                 num = num[:-1]
@@ -97,14 +93,14 @@ def win_getNum(prompt='> ', choices=2, stream=None):
         return None
 
 
-def win_pause():
+def WinPause():
     """
     Stops the program from exiting immediatly.
     """
     import msvcrt
-    for c in "Press any key to exit.":
+    for c in "\nPress any key to exit.":
         msvcrt.putwch(c)
-    while 1:
+    while True:
         c = msvcrt.getwch()
         if c:
             break
@@ -112,8 +108,9 @@ def win_pause():
     msvcrt.putwch('\n')
 
 
-def fallback_getpass(prompt='Password: ', stream=None):
+def FallbackGetPass(prompt='Password: ', stream=None):
     """
+    Fallback in case the first try doesnt work for some reason.
 
     :param prompt: Prompt for user
     :param stream: No fucking idea
@@ -123,10 +120,10 @@ def fallback_getpass(prompt='Password: ', stream=None):
     if not stream:
         stream = sys.stderr
     print("Warning: Password input may be echoed.", file=stream)
-    return _raw_input(prompt, stream)
+    return _RawInput(prompt, stream)
 
 
-def _raw_input(prompt="", stream=None, inputt=None):
+def _RawInput(prompt="", stream=None, inputt=None):
     # This doesn't save the string in the GNU readline history.
     if not stream:
         stream = sys.stderr
@@ -151,8 +148,7 @@ def _raw_input(prompt="", stream=None, inputt=None):
     return line
 
 
-# Bind the name getpass to the appropriate function
-
+# Bind the name GetPass to the appropriate function
 try:
     import termios
     # it's possible there is an incompatible termios from the
@@ -163,11 +159,10 @@ except (ImportError, AttributeError):
         # noinspection PyUnresolvedReferences
         import msvcrt
     except ImportError:
-        getpass = fallback_getpass
+        GetPass = FallbackGetPass
     else:
-        getpass = win_getpass
-        getnum = win_getNum
-        pause = win_pause
+        GetPass = WinGetPass
+        GetNum = WinGetNum
+        Pause = WinPause
 else:
-    # getpass = unix_getpass
     raise errors.UnsupportedError()
