@@ -35,7 +35,8 @@
 
 > Located at %appdata%\Iaz3Programs\TCBot on windows.
 
-* Dependencies: **Python 3.x**, **[RbxAPI](https://github.com/iaz3/RbxAPI)** LXML, Requests, cx_freeze, Beautifulsoup 4, and colorama.
+* Dependencies: **Python 3.x**, **[RbxAPI](https://github.com/iaz3/RbxAPI)**, LXML, Requests, cx_freeze, 
+Beautifulsoup 4, and colorama.
 * Build Dependencies: Cx_Freeze is needed **in addition to** the above to build.
 * How to run tests: No Tests
 
