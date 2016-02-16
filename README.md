@@ -12,6 +12,9 @@
 
 ** THIS WILL ALLOW THE BOT TO AUTOMATICALLY LOG IN AND RESUME TRADING IF THE COOKIE EXPIRES, MEANING IT CAN RUN 24/7 WITHOUT INTERRUPTION **
 
+### Information/Troubleshooting/FAQ ###
+[FAQ/Troubleshooting](https://bitbucket.org/Iaz3/tcbot/wiki/Troubleshooting)
+
 ### Downloads ###
 * [Download](https://bitbucket.org/Iaz3/tcbot/wiki/Downloads)
 * Simply run the TCBot shortcut created on your desktop
