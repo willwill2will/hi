@@ -1,5 +1,20 @@
 # Roblox Trade Currency Bot #
 
+## UPCOMING UPDATE: 3.0 ##
+### This update will have a massively improved trading algorithm, better error handling, and much much more! ###
+# !!WARNING!! #
+** THE NEW 3.0 UPDATE *WILL* SAVE YOUR USERNAME AND PASSWORD TO FILE(ONLY TO YOUR COMPUTER. IT IS NOT BEING SAVED ANYWHERE ELSE.) IF YOU DO NOT WANT THIS, CONTINUE USING 2.0**
+
+** THIS REPLACES CURRENT BEHAVIOUR, WHERE IT DOES NOT SAVE THEM, ONLY THE .ROBLOSECURITY COOKIE WHICH IS USED TO LOAD THE ACCOUNT **
+
+** THIS IS BEING DONE SO THAT THE BOT CAN RUN 24/7 **
+** CURRENTLY, THE COOKIE CAN EXPIRE(THAT MEANS IT WONT WORK ANYMORE, AND CRASH THE BOT) AND IT WILL HAVE NO WAY TO LOGIN AGAIN, EXCEPT RESTARTING. **
+
+** THIS WILL ALLOW THE BOT TO AUTOMATICALLY LOG IN AND RESUME TRADING IF THE COOKIE EXPIRES, MEANING IT CAN RUN 24/7 WITHOUT INTERRUPTION **
+
+### Information/Troubleshooting/FAQ ###
+[FAQ/Troubleshooting](https://bitbucket.org/Iaz3/tcbot/wiki/Troubleshooting)
+
 ### Downloads ###
 * [Download](https://bitbucket.org/Iaz3/tcbot/wiki/Downloads)
 * Simply run the TCBot shortcut created on your desktop
@@ -16,7 +31,7 @@
 > NOTE: You only need the below Dependencies if you are NOT using the EXE
 * Configuration: config.ini
 > Located at %appdata%\Iaz3Programs\TCBot on windows.
-* Dependencies: **Python 3.x**, LXML, Requests, Beautifulsoup 4, and colorama.
+* Dependencies: **Python 3.x**, LXML, Requests, cx_freeze, Beautifulsoup 4, and colorama.
 * Build Dependencies: Cx_Freeze is needed **in addition to** the above to build.
 * How to run tests: No Tests
 
