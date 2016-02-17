@@ -369,6 +369,8 @@ class InnoScript(object):
             yield filename, relname
 
     def handle_iss_run(self, lines, fp):
+        issline(fp, Filename="{app}\\TCBot.exe", Description="Run TCBot", WorkingDir="{app}", Flags="nowait "
+                                                                                                    "postinstall")
         self.handle_iss(lines, fp)
 
     def handle_iss_uninstallrun(self, lines, fp):
