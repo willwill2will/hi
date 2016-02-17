@@ -385,6 +385,7 @@ class InnoScript(object):
             issline(fp, Name="{group}\\Uninstall %s" % self.metadata['name'], Filename="{uninstallexe}",
                     IconFilename="{app}\\TCIcon.ico", )
             issline(fp, Name="{group}\\TCBot", Filename="{app}\\TCBot.exe", IconFilename="{app}\\TCIcon.ico")
+            issline(fp, Name="{userdesktop}\\TCBot", Filename="{app}\\TCBot.exe", IconFilename="{app}\\TCIcon.ico")
             if self.builder.regist_startup:
                 issline(fp, Name="{commonstartup}\\%s" % self.metadata['name'], Filename="{app}\\%s" % 'TCBot.exe',
                         IconFilename="{app}\\TCIcon.ico")
