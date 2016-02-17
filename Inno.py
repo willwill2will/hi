@@ -63,12 +63,15 @@ end;
     'x64': platform.machine() == 'AMD64',
 }
 
+
 class SafeDict(dict):
     """
     Handles proper string formatting with the Inno Setup constants
     """
+
     def __missing__(self, key):
         return '{' + key + '}'
+
 
 def ModName(handle):
     """
@@ -418,18 +421,17 @@ class InnoScript(object):
 
             # write "#define CONSTANT value"
             consts = self.iss_consts
-            print(*sys.version_info[:2])
-            sys.exit()
             # FOFF
             consts.update({
-                'PYTHON_VERION': '%d.%d' % sys.version_info[:2],
-                'PYTHON_VER': '%d%d' % sys.version_info[:2],
+                'PYTHON_VERION': "{0}.{1}".format(*sys.version_info[:2]),
+                'PYTHON_VER': "{0}{1}".format(*sys.version_info[:2]),
                 'PYTHON_DIR': sys.prefix, 'PYTHON_DLL': ModName(sys.dllhandle),
             })
             # FON
             consts.update((k.upper(), v) for k, v in list(self.metadata.items()))
             for k in sorted(consts):
-                fp.write(('#define %s "%s"\n' % (k, consts[k],)).encode('utf_8'))
+                # fp.write(('#define %s "%s"\n' % (k, consts[k],)).encode('utf_8'))
+                fp.write(('#define {0} "{1}"\n'.format(k, consts[k], )).encode('utf_8'))
             fp.write(b'\n')
 
             # handle sections
