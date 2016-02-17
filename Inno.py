@@ -277,7 +277,7 @@ class InnoScript(object):
             iss_metadata["SolidCompression"] = 'yes'
 
         # add InfoBeforeFile
-        for filename in ('README', 'README.txt', "README.MD"):
+        for filename in ('README', 'README.txt', "TCInfo.txt"):
             if os.path.isfile(filename):
                 iss_metadata['InfoBeforeFile'] = os.path.abspath(filename)
                 break
