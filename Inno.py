@@ -63,6 +63,12 @@ end;
     'x64': platform.machine() == 'AMD64',
 }
 
+class SafeDict(dict):
+    """
+    Handles proper string formatting with the Inno Setup constants
+    """
+    def __missing__(self, key):
+        return '{' + key + '}'
 
 def ModName(handle):
     """
@@ -137,21 +143,21 @@ class InnoScript(object):
     Handles and creates an Inno Setup Script
     """
     # FOFF
-    setupConstants = dict(AppName='%(name)s',
-                          AppVerName='%(name)s %(version)s',
-                          AppVersion='%(version)s',
-                          VersionInfoVersion='%(version)s',
-                          AppCopyright='Copyright (C) 2015-2016 %(author)s',
-                          AppContact='%(author_email)s',
-                          AppComments='%(description)s',
-                          AppPublisher='%(author)s',
-                          AppPublisherURL='%(url)s',
-                          AppSupportURL='%(url)s',
+    setupConstants = dict(AppName='{name}',
+                          AppVerName='{name} {version}',
+                          AppVersion='{version}',
+                          VersionInfoVersion='{version}',
+                          AppCopyright='Copyright (C) 2015-2016 {author}',
+                          AppContact='{author_email}',
+                          AppComments='{description}',
+                          AppPublisher='{author}',
+                          AppPublisherURL='{url}',
+                          AppSupportURL='{url}',
                           SetupMutex="Iaz3TCBotSetup"
                           )
-    setupMetadata = dict(DefaultGroupName='%(name)s',
-                         DefaultDirName='{pf}\\%(name)s',
-                         OutputBaseFilename='%(name)s-%(version)s-' + str(sysconfig.get_platform()) + '-setup', )
+    setupMetadata = dict(DefaultGroupName='{name}',
+                         DefaultDirName='{pf}\\{name}',
+                         OutputBaseFilename='{name}-{version}-' + str(sysconfig.get_platform()) + '-setup', )
     # Setup file name.
     # FON
     setupMetadata.update(setupConstants)
@@ -166,7 +172,7 @@ class InnoScript(object):
         Sets some defaults
         """
         self.builder = builder  # The object that called this.
-        self.issfile = "distutils.iss"  # The file that will be created to hold the setup script. Overwritten.
+        self.SetupFile = "distutils.iss"  # The file that will be created to hold the setup script. Overwritten.
 
     def parse_iss(self, s):
         firstline = ''
@@ -333,6 +339,7 @@ class InnoScript(object):
                     flags.append('uninsrestartdelete')
 
                 if filename.startswith(self.builder.DistDir):
+                    # Handles subdirs, sets them up relative to DistDir
                     place = os.path.dirname(filename)
             else:
                 # isdir
@@ -341,7 +348,8 @@ class InnoScript(object):
                     filename += '\\*'
                 flags.extend(self.default_dir_flags)
 
-            issline(fp, Source=filename, DestDir="{app}\\{0}".format(place, app="{app}"), Flags=' '.join(flags))
+            # issline(fp, Source=filename, DestDir="{app}\\{0}".format(place, app="{app}"), Flags=' '.join(flags))
+            issline(fp, Source=filename, DestDir="{app}\\{place}".format_map(SafeDict(place=place)))
             stored.add(filename)
 
         self.handle_iss(lines, fp)
@@ -394,7 +402,7 @@ class InnoScript(object):
         self.handle_iss(lines, fp)
         fp.write(DEFAULT_CODES.encode())
 
-    def create(self):
+    def Create(self):
         """
         Create Inno Installer script, which will be used to make the setup.exe
         """
@@ -404,12 +412,14 @@ class InnoScript(object):
         else:
             CustomInnoScript = self.builder.CustomInnoScript
 
-        with open(self.issfile, 'wb') as fp:
+        with open(self.SetupFile, 'wb') as fp:
             fp.write(codecs.BOM_UTF8)
             fp.write(b'; This file is created by distutils InnoSetup extension.\n')
 
             # write "#define CONSTANT value"
             consts = self.iss_consts
+            print(*sys.version_info[:2])
+            sys.exit()
             # FOFF
             consts.update({
                 'PYTHON_VERION': '%d.%d' % sys.version_info[:2],
@@ -441,7 +451,7 @@ class InnoScript(object):
                     fp.write(b'\n')
 
     def compile(self):
-        subprocess.call([self.innoexepath, '/cc', self.issfile])
+        subprocess.call([self.innoexepath, '/cc', self.SetupFile])
         # outputdir = self.iss_metadata.get('OutputDir', os.path.join(os.path.dirname(self.issfile), 'Output'))
         setupfile = os.path.abspath(
             os.path.join(self.builder.DistDir, self.iss_metadata.get('OutputBaseFilename', 'setup') + '.exe'))
@@ -490,5 +500,5 @@ class innosetup(build_exe):
         build_exe.run(self)
 
         script = InnoScript(self)
-        script.create()
+        script.Create()
         script.compile()
