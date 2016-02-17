@@ -146,21 +146,21 @@ class InnoScript(object):
     Handles and creates an Inno Setup Script
     """
     # FOFF
-    setupConstants = dict(AppName='{name}',
-                          AppVerName='{name} {version}',
-                          AppVersion='{version}',
-                          VersionInfoVersion='{version}',
-                          AppCopyright='Copyright (C) 2015-2016 {author}',
-                          AppContact='{author_email}',
-                          AppComments='{description}',
-                          AppPublisher='{author}',
-                          AppPublisherURL='{url}',
-                          AppSupportURL='{url}',
+    setupConstants = dict(AppName='%(name)s',
+                          AppVerName='%(name)s %(version)s',
+                          AppVersion='%(version)s',
+                          VersionInfoVersion='%(version)s',
+                          AppCopyright='Copyright (C) 2015-2016 %(author)s',
+                          AppContact='%(author_email)s',
+                          AppComments='%(description)s',
+                          AppPublisher='%(author)s',
+                          AppPublisherURL='%(url)s',
+                          AppSupportURL='%(url)s',
                           SetupMutex="Iaz3TCBotSetup"
                           )
-    setupMetadata = dict(DefaultGroupName='{name}',
-                         DefaultDirName='{pf}\\{name}',
-                         OutputBaseFilename='{name}-{version}-' + str(sysconfig.get_platform()) + '-setup', )
+    setupMetadata = dict(DefaultGroupName='%(name)s',
+                         DefaultDirName='{pf}\\%(name)s',
+                         OutputBaseFilename='%(name)s-%(version)s-' + str(sysconfig.get_platform()) + '-setup', )
     # Setup file name.
     # FON
     setupMetadata.update(setupConstants)
