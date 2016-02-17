@@ -16,7 +16,7 @@
 [FAQ/Troubleshooting](https://github.com/iaz3/TCBot/wiki/Troubleshooting)
 
 ### Downloads ###
-* [Download](https://github.com/iaz3/TCBot/wiki/Downloads)
+* Releases tab here on github.
 * Simply run the TCBot shortcut created on your desktop
 
 ### What is this repository for? ###
