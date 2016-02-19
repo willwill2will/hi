@@ -272,7 +272,9 @@ class InnoScript(object):
         iss_metadata['AppId'] = self.AppId
         iss_metadata['AllowNoIcons'] = 'yes'
         iss_metadata['AlwaysUsePersonalGroup'] = 'yes'
-
+        if platform.architecture()[0] == "64bit" or (sys.maxsize > 2 ** 32):
+            iss_metadata['ArchitecturesInstallIn64BitMode'] = 'x64'
+            iss_metadata['ArchitecturesAllowed'] = 'x64'
         if False:
             iss_metadata["SolidCompression"] = 'yes'
 
