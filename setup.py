@@ -73,7 +73,7 @@ bdist_msi_options = {
 
 app = Executable("Main.py", targetName='TCBot.exe', icon="TCicon.ico", )
 
-ver = '3.0'
+ver = '3.0.2'
 # FOFF
 setup(name="Trade Currency Bot", author='Diana',
       author_email='CrazyKilla15@gmail.com',

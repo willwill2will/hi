@@ -34,7 +34,7 @@ values = {
     '__EVENTTARGET': 'ctl00$ctl00$cphRoblox$cphMyRobloxContent$ctl00$SubmitTradeButton'
 }
 
-version = '3.0'
+version = '3.0.2'
 
 Banner = """Trade Currency Bot made by Iaz3, offically distrubuted on reddit/bitbucket via MEGA. BOT IS PROVIDED AS IS.
 ROBLOX TCBot version {0}, Copyright (C) 2015 Diana
