@@ -2,7 +2,7 @@ README
 
 Thank you for installing my ROBLOX Trade Currency bot!
 
-This is currently version 3.0!
+This is currently version 3.0.x!
 
 !! WARNING !!
 This version WILL save your username and password to your computer(and ONLY your computer) for the purposes of

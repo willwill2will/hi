@@ -2,7 +2,6 @@
 
 distutils.iss
 gui.py
-TCInfo.txt
 test.py
 
 
