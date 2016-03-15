@@ -1,4 +1,17 @@
-# Roblox Trade Currency Bot #
+# Iaz3's Roblox Trade Currency Bot #
+
+# ROBLOX Discontinuing Tickets. TCBot useless starting 4/13/2016 #
+
+[ROBLOX saying goodbye to tickets](http://blog.roblox.com/2016/03/saying-goodbye-to-tickets/)
+
+ROBLOX is removing the Trade Currency, and the Tickets. in 30 days
+
+Starting April 13th, the TCBot will be useless.
+
+I recommend running the bot to make whatever you can, but making sure to stop it and get all your tickets to robux before they're gone forever. **Be Warned. You could in theory lose money this way. The rates are going to go crazy as everyone trades to ROBUX. You might be at a loss by the time you cancel it.**
+
+
+## OUTDATED BELOW. SEE ABOVE. ##
 
 ### Information/Troubleshooting/FAQ ###
 [FAQ/Troubleshooting](https://github.com/iaz3/TCBot/wiki/Troubleshooting)
