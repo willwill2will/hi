@@ -1,6 +1,7 @@
 # Iaz3's Roblox Trade Currency Bot #
 
 # ROBLOX Discontinuing Tickets. TCBot useless starting 4/13/2016 #
+# I AM NOT PROVIDING ANYMORE DOWNLOAD LINKS AND WILL NOT SUPPORT ANYBODY USING THE BOT. IT IS RISKY TO USE AT THIS POINT IN TIME. DONT USE IT #
 
 [ROBLOX saying goodbye to tickets](http://blog.roblox.com/2016/03/saying-goodbye-to-tickets/)
 
